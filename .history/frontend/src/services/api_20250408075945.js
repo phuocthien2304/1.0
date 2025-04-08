@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { toast } from 'react-toastify';
 
 const BASE_URL = "/api";
 export const API_URL = BASE_URL;
@@ -29,19 +28,23 @@ instance.interceptors.response.use(
     return res; 
   },
   async (err) => {
-    if (err.response && err.response.status === 401) {
-      localStorage.removeItem("user");
-      toast.error('Phiên đăng nhập đã hết hạn', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 1500);
+    const originalConfig = err.config;
+
+    if (err.response) {
+      if (err.response.status === 401 && !originalConfig._retry) {
+        originalConfig._retry = true;
+        
+        try {
+          const user = JSON.parse(localStorage.getItem("user"));
+          if (user && user.token) {
+            originalConfig.headers["Authorization"] = `Bearer ${user.token}`;
+            return instance(originalConfig);
+          }
+        } catch (retryError) {
+          console.error("Lỗi khi retry request:", retryError);
+          return Promise.reject(retryError);
+        }
+      }
       return Promise.reject(err);
     }
     return Promise.reject(err);

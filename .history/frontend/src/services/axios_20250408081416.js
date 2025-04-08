@@ -1,21 +1,21 @@
 import axios from 'axios';
+import { store } from '../redux/store';
+import { logout } from '../redux/authSlice';
 import { toast } from 'react-toastify';
 
-const BASE_URL = "/api";
-export const API_URL = BASE_URL;
-
 const instance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: 'http://localhost:8080/api',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
+// Add a request interceptor
 instance.interceptors.request.use(
   (config) => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user && user.token) {
-      config.headers["Authorization"] = `Bearer ${user.token}`;
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.accessToken) {
+      config.headers['Authorization'] = 'Bearer ' + user.accessToken;
     }
     return config;
   },
@@ -24,13 +24,12 @@ instance.interceptors.request.use(
   }
 );
 
+// Add a response interceptor
 instance.interceptors.response.use(
-  (res) => {
-    return res; 
-  },
-  async (err) => {
-    if (err.response && err.response.status === 401) {
-      localStorage.removeItem("user");
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      store.dispatch(logout());
       toast.error('Phiên đăng nhập đã hết hạn', {
         position: "top-right",
         autoClose: 3000,
@@ -39,13 +38,10 @@ instance.interceptors.response.use(
         pauseOnHover: true,
         draggable: true,
       });
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 1500);
-      return Promise.reject(err);
+      window.location.href = '/login';
     }
-    return Promise.reject(err);
+    return Promise.reject(error);
   }
 );
 
-export default instance;
+export default instance; 

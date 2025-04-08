@@ -57,6 +57,10 @@ import com.example.backend.repository.LopHocRepository;
 import com.example.backend.repository.LichSuMuonPhongRepository;
 import com.example.backend.security.services.UserDetailsImpl;
 import com.example.backend.service.ThongBaoService;
+import com.example.backend.model.ThongBaoNhan;
+import com.example.backend.repository.ThongBaoNhanRepository;
+import com.example.backend.model.ThongBaoGui;
+import com.example.backend.repository.ThongBaoGuiRepository;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController

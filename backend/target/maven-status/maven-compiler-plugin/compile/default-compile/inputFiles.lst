@@ -2,6 +2,7 @@ E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\RoleRepositor
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\UserRepository.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\security\services\UserDetailsServiceImpl.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\security\services\UserDetailsImpl.java
+E:\HocTap\1.0\backend\src\main\java\com\example\backend\controllers\ThongBaoController.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\controllers\GiangVienController.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\NguoiDungRepository.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\model\QuanLy.java
@@ -40,7 +41,6 @@ E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\QuanLyReposit
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\payload\request\TaiKhoanRequest.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\model\PhanHoi.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\LichSuMuonPhongRepository.java
-E:\HocTap\1.0\backend\src\main\java\com\example\backend\controller\ThongBaoController.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\model\GiangVien.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\PhanHoiRepository.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\payload\request\LoginRequest.java
@@ -50,7 +50,6 @@ E:\HocTap\1.0\backend\src\main\java\com\example\backend\service\ThongBaoService.
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\controllers\QuanLyController.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\BackendApplication.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\YeuCauMuonPhongRepository.java
-E:\HocTap\1.0\backend\src\main\java\com\example\backend\controllers\TestController.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\model\SuCo.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\GiangVienRepository.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\model\ThongBaoNhan.java

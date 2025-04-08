@@ -57,6 +57,10 @@ import com.example.backend.repository.LopHocRepository;
 import com.example.backend.repository.LichSuMuonPhongRepository;
 import com.example.backend.security.services.UserDetailsImpl;
 import com.example.backend.service.ThongBaoService;
+import com.example.backend.model.ThongBaoNhan;
+import com.example.backend.repository.ThongBaoNhanRepository;
+import com.example.backend.model.ThongBaoGui;
+import com.example.backend.repository.ThongBaoGuiRepository;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -103,6 +107,11 @@ public class QuanLyController {
     @Autowired
     private ThongBaoService thongBaoService;
     
+    @Autowired
+    private ThongBaoNhanRepository thongBaoNhanRepository;
+    
+    @Autowired
+    private ThongBaoGuiRepository thongBaoGuiRepository;
     
     private QuanLy getCurrentQuanLy() {
         try {
@@ -216,7 +225,7 @@ public class QuanLyController {
         String noiDung = "Yêu cầu mượn phòng " + yeuCau.getPhong().getMaPhong() + 
                       " từ " + sdf.format(yeuCau.getThoiGianMuon()) + 
                       " đến " + sdf.format(yeuCau.getThoiGianTra()) + 
-                      " đã được duyệt. Nếu bạn đến trễ 30 phút yêu cầu này sẽ bị hủy.";
+                      " đã được duyệt.";
         
         thongBaoService.guiThongBao(quanLy.getNguoiDung(), tieuDe, noiDung, 
                               yeuCau.getNguoiMuon().getIdNguoiDung(), null);
@@ -2340,6 +2349,86 @@ public class QuanLyController {
             logger.log(Level.SEVERE, "Lỗi khi lấy danh sách yêu cầu đã cho mượn", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(null);
+        }
+    }
+
+    @PostMapping("/duyet-yeu-cau/{id}")
+    public ResponseEntity<?> duyetYeuCau(@PathVariable Integer id) {
+        try {
+            YeuCauMuonPhong yeuCau = yeuCauMuonPhongRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu"));
+
+            // Kiểm tra xem yêu cầu đã được duyệt chưa
+            if (yeuCau.getTrangThai() == YeuCauMuonPhong.TrangThai.DADUYET) {
+                return ResponseEntity.badRequest().body("Yêu cầu này đã được duyệt trước đó");
+            }
+
+            // Kiểm tra xem yêu cầu đã bị từ chối chưa
+            if (yeuCau.getTrangThai() == YeuCauMuonPhong.TrangThai.KHONGDUOCDUYET) {
+                return ResponseEntity.badRequest().body("Yêu cầu này đã bị từ chối trước đó");
+            }
+
+            // Kiểm tra trùng lịch phòng
+            List<YeuCauMuonPhong> trungLichPhong = yeuCauMuonPhongRepository.kiemTraTrungLichPhongKhiCapNhat(
+                yeuCau.getPhong().getMaPhong(),
+                yeuCau.getThoiGianMuon(),
+                yeuCau.getThoiGianTra(),
+                id
+            );
+
+            if (!trungLichPhong.isEmpty()) {
+                StringBuilder message = new StringBuilder("Phòng đã được đặt trong khoảng thời gian này:\n");
+                for (YeuCauMuonPhong yc : trungLichPhong) {
+                    message.append("- Từ ").append(yc.getThoiGianMuon())
+                        .append(" đến ").append(yc.getThoiGianTra())
+                        .append(" bởi ").append(yc.getNguoiMuon().getHoTen())
+                        .append("\n");
+                }
+                return ResponseEntity.badRequest().body(message.toString());
+            }
+
+            // Kiểm tra trùng lịch người mượn
+            List<YeuCauMuonPhong> trungLichNguoiMuon = yeuCauMuonPhongRepository.kiemTraTrungLichNguoiMuonKhiCapNhat(
+                yeuCau.getNguoiMuon().getIdNguoiDung(),
+                yeuCau.getThoiGianMuon(),
+                yeuCau.getThoiGianTra(),
+                id
+            );
+
+            if (!trungLichNguoiMuon.isEmpty()) {
+                StringBuilder message = new StringBuilder("Người mượn đã có lịch mượn phòng khác trong khoảng thời gian này:\n");
+                for (YeuCauMuonPhong yc : trungLichNguoiMuon) {
+                    message.append("- Phòng ").append(yc.getPhong().getMaPhong())
+                        .append(" từ ").append(yc.getThoiGianMuon())
+                        .append(" đến ").append(yc.getThoiGianTra())
+                        .append("\n");
+                }
+                return ResponseEntity.badRequest().body(message.toString());
+            }
+
+            // Cập nhật trạng thái yêu cầu
+            yeuCau.setTrangThai(YeuCauMuonPhong.TrangThai.DADUYET);
+            yeuCauMuonPhongRepository.save(yeuCau);
+
+            // Tạo thông báo cho người mượn
+            ThongBaoGui thongBaoGui = new ThongBaoGui();
+            thongBaoGui.setTieuDe("Thông báo yêu cầu mượn phòng đã được duyệt");
+            thongBaoGui.setNoiDung("Bạn đã được duyệt yêu cầu mượn phòng " + yeuCau.getPhong().getMaPhong() + 
+                " từ " + yeuCau.getThoiGianMuon() + " đến " + yeuCau.getThoiGianTra() + 
+                ". Vui lòng đến sớm để nhận phòng, nếu đến trễ 30p, yêu cầu này sẽ bị hủy");
+            thongBaoGui.setThoiGian(new Date());
+            thongBaoGui = thongBaoGuiRepository.save(thongBaoGui);
+
+            // Gửi thông báo đến người mượn
+            ThongBaoNhan thongBaoNhan = new ThongBaoNhan();
+            thongBaoNhan.setThongBaoGui(thongBaoGui);
+            thongBaoNhan.setNguoiNhan(yeuCau.getNguoiMuon());
+            thongBaoNhan.setTrangThai(ThongBaoNhan.TrangThai.CHUADOC);
+            thongBaoNhanRepository.save(thongBaoNhan);
+
+            return ResponseEntity.ok("Duyệt yêu cầu thành công");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi khi duyệt yêu cầu: " + e.getMessage());
         }
     }
 } 

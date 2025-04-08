@@ -8,7 +8,6 @@ com\example\backend\model\SuCo.class
 com\example\backend\controllers\AuthController.class
 com\example\backend\security\services\UserDetailsImpl.class
 com\example\backend\model\YeuCauMuonPhong.class
-com\example\backend\controller\ThongBaoController.class
 com\example\backend\model\ThoiKhoaBieu$ThuTrongTuan.class
 com\example\backend\security\jwt\JwtUtils.class
 com\example\backend\model\SinhVien.class
@@ -59,7 +58,6 @@ com\example\backend\repository\PhongRepository.class
 com\example\backend\model\Phong$TrangThai.class
 com\example\backend\repository\ThongBaoGuiRepository.class
 com\example\backend\payload\request\PhanHoiRequest.class
-com\example\backend\controllers\TestController.class
 com\example\backend\repository\SinhVienRepository.class
 com\example\backend\model\Role.class
 com\example\backend\repository\NguoiDungRepository.class

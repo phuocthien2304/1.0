@@ -27,8 +27,9 @@ public class YeuCauMuonPhongSchedulerService {
 
     @Scheduled(fixedRate = 300000) // Chạy mỗi 5 phút (5 * 60 * 1000 ms)
     public void kiemTraVaCapNhatTrangThaiYeuCau() {
+        System.out.println("Time Restart: " + new Date());
         Date now = new Date();
-        System.out.println("Time Restart: " + now);
+        
         // Lấy danh sách các yêu cầu đã duyệt
         List<YeuCauMuonPhong> danhSachYeuCau = yeuCauMuonPhongRepository.findByTrangThai(YeuCauMuonPhong.TrangThai.DADUYET);
         

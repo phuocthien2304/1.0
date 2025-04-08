@@ -39,9 +39,7 @@ instance.interceptors.response.use(
         pauseOnHover: true,
         draggable: true,
       });
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 1500);
+      window.location.replace('/login');
       return Promise.reject(err);
     }
     return Promise.reject(err);
