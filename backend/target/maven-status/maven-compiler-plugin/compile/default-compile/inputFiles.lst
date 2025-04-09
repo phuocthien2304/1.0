@@ -1,13 +1,12 @@
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\RoleRepository.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\UserRepository.java
-E:\HocTap\1.0\backend\src\main\java\com\example\backend\security\services\UserDetailsServiceImpl.java
-E:\HocTap\1.0\backend\src\main\java\com\example\backend\security\services\UserDetailsImpl.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\controllers\ThongBaoController.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\controllers\GiangVienController.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\NguoiDungRepository.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\model\QuanLy.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\model\NguoiDung.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\model\SinhVien.java
+E:\HocTap\1.0\backend\src\main\java\com\example\backend\service\UserDetailsServiceImpl.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\controllers\SinhVienController.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\payload\request\PhanHoiRequest.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\payload\response\MessageResponse.java
@@ -22,6 +21,8 @@ E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\ThoiKhoaBieuR
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\config\DBInitializer.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\payload\request\ThongBaoRequest.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\security\jwt\AuthEntryPointJwt.java
+E:\HocTap\1.0\backend\src\main\java\com\example\backend\controllers\SuCoController.java
+E:\HocTap\1.0\backend\src\main\java\com\example\backend\service\SuCoService.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\model\ThoiKhoaBieu.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\service\LopHocService.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\security\jwt\JwtUtils.java
@@ -45,6 +46,7 @@ E:\HocTap\1.0\backend\src\main\java\com\example\backend\model\GiangVien.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\PhanHoiRepository.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\payload\request\LoginRequest.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\model\Phong.java
+E:\HocTap\1.0\backend\src\main\java\com\example\backend\service\UserDetailsImpl.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\PhongRepository.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\service\ThongBaoService.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\controllers\QuanLyController.java
@@ -52,6 +54,7 @@ E:\HocTap\1.0\backend\src\main\java\com\example\backend\BackendApplication.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\YeuCauMuonPhongRepository.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\model\SuCo.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\GiangVienRepository.java
+E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\SuCoRepository.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\model\ThongBaoNhan.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\repository\SinhVienRepository.java
 E:\HocTap\1.0\backend\src\main\java\com\example\backend\controllers\AuthController.java
