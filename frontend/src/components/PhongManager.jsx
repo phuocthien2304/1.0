@@ -1,9 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Table, Button, Form, Modal, Badge, ProgressBar } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Table,
+  Button,
+  Form,
+  Modal,
+  Badge,
+  ProgressBar,
+  Dropdown,
+} from "react-bootstrap";
 import axios from "axios";
 import authHeader from "../services/auth-header";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash, faTools, faCheck, faTimes, faPlus, faSearch, faChartBar } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faTrash,
+  faCircleInfo,
+  faTools,
+  faCheck,
+  faTimes,
+  faClockRotateLeft,
+  faPlus,
+  faSearch,
+  faChartBar,
+  faFilter,
+} from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 const API_URL = "http://localhost:8080/api/quanly";
@@ -15,7 +39,10 @@ const PhongManager = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [currentPhong, setCurrentPhong] = useState(null);
+  const [borrowingHistory, setBorrowingHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,9 +51,9 @@ const PhongManager = () => {
     loaiPhong: "HOC",
     trangThai: "TRONG",
     sucChua: 0,
-    viTri: ""
+    viTri: "",
   });
-
+  const [filter, setFilter] = useState("ALL");
   // Lấy danh sách phòng học khi component được render
   useEffect(() => {
     fetchPhongList();
@@ -36,7 +63,9 @@ const PhongManager = () => {
   const fetchPhongList = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/phong`, { headers: authHeader() });
+      const response = await axios.get(`${API_URL}/phong`, {
+        headers: authHeader(),
+      });
       setPhongList(response.data);
       setLoading(false);
     } catch (error) {
@@ -50,7 +79,9 @@ const PhongManager = () => {
   const fetchPhongStats = async () => {
     setStatsLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/phong/thongke`, { headers: authHeader() });
+      const response = await axios.get(`${API_URL}/phong/thongke`, {
+        headers: authHeader(),
+      });
       setPhongStats(response.data);
       setStatsLoading(false);
     } catch (error) {
@@ -64,7 +95,8 @@ const PhongManager = () => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === "sucChua" ? (value === "" ? "" : parseInt(value, 10)) : value
+      [name]:
+        name === "sucChua" ? (value === "" ? "" : parseInt(value, 10)) : value,
     });
   };
 
@@ -75,7 +107,7 @@ const PhongManager = () => {
       loaiPhong: "HOC",
       trangThai: "TRONG",
       sucChua: "",
-      viTri: ""
+      viTri: "",
     });
     setShowAddModal(true);
   };
@@ -95,19 +127,19 @@ const PhongManager = () => {
     try {
       const requestData = {
         ...formData,
-        sucChua: parseInt(formData.sucChua, 10)
+        sucChua: parseInt(formData.sucChua, 10),
       };
 
-      const response = await axios.post(
-        `${API_URL}/phong`,
-        requestData,
-        { headers: authHeader() }
-      );
+      const response = await axios.post(`${API_URL}/phong`, requestData, {
+        headers: authHeader(),
+      });
       setShowAddModal(false);
       toast.success("Phòng học đã được tạo thành công!");
       fetchPhongList();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi tạo phòng học.");
+      toast.error(
+        error.response?.data?.message || "Đã có lỗi xảy ra khi tạo phòng học."
+      );
     }
   };
 
@@ -119,11 +151,10 @@ const PhongManager = () => {
       loaiPhong: phong.loaiPhong,
       trangThai: phong.trangThai,
       sucChua: phong.sucChua || "",
-      viTri: phong.viTri
+      viTri: phong.viTri,
     });
     setShowEditModal(true);
   };
-
   // Cập nhật phòng học
   const handleUpdatePhong = async () => {
     if (!formData.viTri) {
@@ -139,7 +170,7 @@ const PhongManager = () => {
     try {
       const requestData = {
         ...formData,
-        sucChua: parseInt(formData.sucChua, 10)
+        sucChua: parseInt(formData.sucChua, 10),
       };
 
       const response = await axios.put(
@@ -151,7 +182,10 @@ const PhongManager = () => {
       toast.success("Cập nhật phòng học thành công!");
       fetchPhongList();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi cập nhật phòng học.");
+      toast.error(
+        error.response?.data?.message ||
+          "Đã có lỗi xảy ra khi cập nhật phòng học."
+      );
     }
   };
 
@@ -164,15 +198,16 @@ const PhongManager = () => {
   // Xóa phòng học
   const handleDeletePhong = async () => {
     try {
-      await axios.delete(
-        `${API_URL}/phong/${currentPhong.maPhong}`,
-        { headers: authHeader() }
-      );
+      await axios.delete(`${API_URL}/phong/${currentPhong.maPhong}`, {
+        headers: authHeader(),
+      });
       setShowConfirmModal(false);
       toast.success("Phòng học đã được xóa thành công!");
       fetchPhongList();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi xóa phòng học.");
+      toast.error(
+        error.response?.data?.message || "Đã có lỗi xảy ra khi xóa phòng học."
+      );
       setShowConfirmModal(false);
     }
   };
@@ -181,20 +216,29 @@ const PhongManager = () => {
   const handleChangePhongStatus = async (phong, newStatus) => {
     // Kiểm tra trạng thái hợp lệ - chỉ cho phép chuyển từ TRONG sang BAOTRI hoặc từ BAOTRI sang TRONG
     if (newStatus === "BAOTRI" && phong.trangThai !== "TRONG") {
-      toast.warning("Chỉ có thể đánh dấu bảo trì cho phòng đang ở trạng thái trống.");
+      toast.warning(
+        "Chỉ có thể đánh dấu bảo trì cho phòng đang ở trạng thái trống."
+      );
       return;
     }
-    
+
     try {
       await axios.put(
         `${API_URL}/phong/${phong.maPhong}/trangthai`,
         { trangThai: newStatus },
         { headers: authHeader() }
       );
-      toast.success(`Trạng thái phòng học đã được cập nhật thành ${renderTrangThaiText(newStatus)}`);
+      toast.success(
+        `Trạng thái phòng học đã được cập nhật thành ${renderTrangThaiText(
+          newStatus
+        )}`
+      );
       fetchPhongList();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi thay đổi trạng thái phòng học.");
+      toast.error(
+        error.response?.data?.message ||
+          "Đã có lỗi xảy ra khi thay đổi trạng thái phòng học."
+      );
     }
   };
 
@@ -223,7 +267,7 @@ const PhongManager = () => {
         return <Badge bg="secondary">{trangThai}</Badge>;
     }
   };
-  
+
   // Hiển thị trạng thái phòng dạng text
   const renderTrangThaiText = (trangThai) => {
     switch (trangThai) {
@@ -239,44 +283,64 @@ const PhongManager = () => {
   };
 
   // Lọc danh sách phòng học theo từ khóa tìm kiếm
-  const filteredPhong = phongList.filter(p =>
-    p.maPhong.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.viTri.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
+  const filteredPhong = phongList.filter((p) => {
+    const matchesSearch =
+      p.maPhong.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.viTri.toLowerCase().includes(searchTerm.toLowerCase());
+
+    if (filter === "ALL") {
+      return matchesSearch;
+    } else if (
+      (filter === "TRONG" || filter === "BAOTRI" || filter === "DANGSUDUNG") &&
+      matchesSearch
+    ) {
+      return matchesSearch && p.trangThai === filter;
+    } else if (filter === "HOC" || (filter === "THUCHANH" && matchesSearch)) {
+      return matchesSearch && p.loaiPhong === filter;
+    }
+  });
+  // // Lọc danh sách phòng học theo từ khóa tìm kiếm
+  // const filteredPhong = phongList.filter(p =>
+  //   p.maPhong.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //   p.viTri.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
   // Tính toán thống kê phòng học
   const calculateRoomStats = () => {
     const total = phongList.length;
-    
+
     // Thống kê theo trạng thái
     const countByStatus = {
-      TRONG: phongList.filter(p => p.trangThai === "TRONG").length,
-      DANGSUDUNG: phongList.filter(p => p.trangThai === "DANGSUDUNG").length,
-      BAOTRI: phongList.filter(p => p.trangThai === "BAOTRI").length
+      TRONG: phongList.filter((p) => p.trangThai === "TRONG").length,
+      DANGSUDUNG: phongList.filter((p) => p.trangThai === "DANGSUDUNG").length,
+      BAOTRI: phongList.filter((p) => p.trangThai === "BAOTRI").length,
     };
-    
+
     // Thống kê theo loại phòng
     const countByType = {
-      HOC: phongList.filter(p => p.loaiPhong === "HOC").length,
-      THUCHANH: phongList.filter(p => p.loaiPhong === "THUCHANH").length
+      HOC: phongList.filter((p) => p.loaiPhong === "HOC").length,
+      THUCHANH: phongList.filter((p) => p.loaiPhong === "THUCHANH").length,
     };
-    
+
     // Tính tỷ lệ phần trăm
     const percentByStatus = {
       TRONG: total ? Math.round((countByStatus.TRONG / total) * 100) : 0,
-      DANGSUDUNG: total ? Math.round((countByStatus.DANGSUDUNG / total) * 100) : 0,
-      BAOTRI: total ? Math.round((countByStatus.BAOTRI / total) * 100) : 0
+      DANGSUDUNG: total
+        ? Math.round((countByStatus.DANGSUDUNG / total) * 100)
+        : 0,
+      BAOTRI: total ? Math.round((countByStatus.BAOTRI / total) * 100) : 0,
     };
-    
+
     // Tính tỷ lệ sử dụng
-    const utilizationRate = total ? Math.round((countByStatus.DANGSUDUNG / total) * 100) : 0;
-    
+    const utilizationRate = total
+      ? Math.round((countByStatus.DANGSUDUNG / total) * 100)
+      : 0;
+
     // Tổng sức chứa
     const totalCapacity = phongList.reduce((sum, p) => sum + p.sucChua, 0);
-    
+
     // Tính sức chứa trung bình
     const avgCapacity = total ? Math.round(totalCapacity / total) : 0;
-    
+
     return {
       total,
       countByStatus,
@@ -284,7 +348,7 @@ const PhongManager = () => {
       percentByStatus,
       utilizationRate,
       totalCapacity,
-      avgCapacity
+      avgCapacity,
     };
   };
 
@@ -300,7 +364,12 @@ const PhongManager = () => {
         <Card.Header className="d-flex justify-content-between align-items-center">
           <h5 className="mb-0">Quản lý phòng học</h5>
           <div>
-            <Button variant="info" className="me-2" onClick={handleShowStatsModal} id="phong-stats-btn">
+            <Button
+              variant="info"
+              className="me-2"
+              onClick={handleShowStatsModal}
+              id="phong-stats-btn"
+            >
               <FontAwesomeIcon icon={faChartBar} /> Báo cáo thống kê
             </Button>
             <Button variant="success" onClick={handleShowAddModal}>
@@ -325,8 +394,68 @@ const PhongManager = () => {
                 </div>
               </Form.Group>
             </Col>
+            <Col md={6} className="d-flex justify-content-end">
+              <Dropdown>
+                <Dropdown.Toggle
+                  variant="light"
+                  style={{ borderColor: "#DEE2E6", color: "black" }}
+                  id="dropdown-basic"
+                >
+                  <FontAwesomeIcon icon={faFilter} /> Lọc theo:{" "}
+                  {filter === "ALL"
+                    ? "Tất cả"
+                    : filter === "TRONG"
+                    ? "Trống"
+                    : filter === "BAOTRI"
+                    ? "Bảo trì"
+                    : filter === "DANGSUDUNG"
+                    ? "Đang sử dụng"
+                    : filter === "HOC"
+                    ? "Phòng học"
+                    : "Phòng thực hành"}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item
+                    active={filter === "ALL"}
+                    onClick={() => setFilter("ALL")}
+                  >
+                    Tất cả
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    active={filter === "TRONG"}
+                    onClick={() => setFilter("TRONG")}
+                  >
+                    Trống
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    active={filter === "BAOTRI"}
+                    onClick={() => setFilter("BAOTRI")}
+                  >
+                    Bảo trì
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    active={filter === "DANGSUDUNG"}
+                    onClick={() => setFilter("DANGSUDUNG")}
+                  >
+                    Đang sử dụng
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    active={filter === "HOC"}
+                    onClick={() => setFilter("HOC")}
+                  >
+                    Phòng học
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    active={filter === "THUCHANH"}
+                    onClick={() => setFilter("THUCHANH")}
+                  >
+                    Phòng thực hành
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </Col>
           </Row>
-          
+
           <div className="table-responsive">
             <Table striped hover className="align-middle">
               <thead>
@@ -335,6 +464,7 @@ const PhongManager = () => {
                   <th>Loại phòng</th>
                   <th>Sức chứa</th>
                   <th>Vị trí</th>
+
                   <th>Trạng thái</th>
                   <th>Thao tác</th>
                 </tr>
@@ -343,7 +473,10 @@ const PhongManager = () => {
                 {loading ? (
                   <tr>
                     <td colSpan="6" className="text-center">
-                      <div className="spinner-border text-primary" role="status">
+                      <div
+                        className="spinner-border text-primary"
+                        role="status"
+                      >
                         <span className="visually-hidden">Loading...</span>
                       </div>
                     </td>
@@ -362,40 +495,58 @@ const PhongManager = () => {
                       <td>{phong.sucChua}</td>
                       <td>{phong.viTri}</td>
                       <td>{renderTrangThai(phong.trangThai)}</td>
-                      <td>
-                        <Button variant="outline-primary" size="sm" className="me-1" onClick={() => handleShowEditModal(phong)}>
+                      <td className="d-flex gap-1">
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          className="mt-3 mb-3"
+                          title="Chỉnh sửa"
+                          onClick={() => handleShowEditModal(phong)}
+                        >
                           <FontAwesomeIcon icon={faEdit} />
                         </Button>
-                        
-                        {/* Nút đánh dấu trạng thái */}
-                        {/* Chỉ hiển thị nút bảo trì nếu phòng đang trống */}
+                        <Button
+                          variant="outline-info"
+                          size="sm"
+                          className="mt-3 mb-3"
+                          title="Lịch sử"
+                          onClick={() => handleShowDetailModal(phong)}
+                        >
+                          <FontAwesomeIcon icon={faClockRotateLeft} />
+                        </Button>
                         {phong.trangThai === "TRONG" && (
-                          <Button 
-                            variant="outline-danger" 
-                            size="sm" 
-                            className="me-1"
-                            onClick={() => handleChangePhongStatus(phong, "BAOTRI")}
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            className="mt-3 mb-3"
+                            onClick={() =>
+                              handleChangePhongStatus(phong, "BAOTRI")
+                            }
                             title="Đánh dấu là bảo trì"
                           >
                             <FontAwesomeIcon icon={faTools} />
                           </Button>
                         )}
-                        
-                        {/* Nút đánh dấu trạng thái trống khi phòng đang bảo trì */}
                         {phong.trangThai === "BAOTRI" && (
-                          <Button 
-                            variant="outline-success" 
-                            size="sm" 
-                            className="me-1"
-                            onClick={() => handleChangePhongStatus(phong, "TRONG")}
+                          <Button
+                            variant="outline-success"
+                            size="sm"
+                            className="mt-3 mb-3"
+                            onClick={() =>
+                              handleChangePhongStatus(phong, "TRONG")
+                            }
                             title="Đánh dấu là trống"
                           >
                             <FontAwesomeIcon icon={faCheck} />
                           </Button>
                         )}
-                        
-                        {/* Nút xóa */}
-                        <Button variant="outline-danger" size="sm" onClick={() => handleShowDeleteConfirm(phong)}>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          className="mt-3 mb-3"
+                          title="Xóa"
+                          onClick={() => handleShowDeleteConfirm(phong)}
+                        >
                           <FontAwesomeIcon icon={faTrash} />
                         </Button>
                       </td>
@@ -409,14 +560,20 @@ const PhongManager = () => {
       </Card>
 
       {/* Modal Thêm phòng học */}
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} backdrop="static">
+      <Modal
+        show={showAddModal}
+        onHide={() => setShowAddModal(false)}
+        backdrop="static"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Thêm phòng học mới</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group className="mb-3">
-              <Form.Label>Mã phòng <span className="text-danger">*</span></Form.Label>
+              <Form.Label>
+                Mã phòng <span className="text-danger">*</span>
+              </Form.Label>
               <Form.Control
                 type="text"
                 name="maPhong"
@@ -427,7 +584,9 @@ const PhongManager = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Loại phòng <span className="text-danger">*</span></Form.Label>
+              <Form.Label>
+                Loại phòng <span className="text-danger">*</span>
+              </Form.Label>
               <Form.Select
                 name="loaiPhong"
                 value={formData.loaiPhong}
@@ -440,7 +599,9 @@ const PhongManager = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Sức chứa <span className="text-danger">*</span></Form.Label>
+              <Form.Label>
+                Sức chứa <span className="text-danger">*</span>
+              </Form.Label>
               <Form.Control
                 type="number"
                 name="sucChua"
@@ -453,7 +614,9 @@ const PhongManager = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Vị trí <span className="text-danger">*</span></Form.Label>
+              <Form.Label>
+                Vị trí <span className="text-danger">*</span>
+              </Form.Label>
               <Form.Control
                 type="text"
                 name="viTri"
@@ -476,7 +639,11 @@ const PhongManager = () => {
       </Modal>
 
       {/* Modal Sửa phòng học */}
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} backdrop="static">
+      <Modal
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
+        backdrop="static"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Sửa phòng học {currentPhong?.maPhong}</Modal.Title>
         </Modal.Header>
@@ -484,15 +651,13 @@ const PhongManager = () => {
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>Mã phòng</Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.maPhong}
-                disabled
-              />
+              <Form.Control type="text" value={formData.maPhong} disabled />
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Loại phòng <span className="text-danger">*</span></Form.Label>
+              <Form.Label>
+                Loại phòng <span className="text-danger">*</span>
+              </Form.Label>
               <Form.Select
                 name="loaiPhong"
                 value={formData.loaiPhong}
@@ -505,7 +670,9 @@ const PhongManager = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Trạng thái <span className="text-danger">*</span></Form.Label>
+              <Form.Label>
+                Trạng thái <span className="text-danger">*</span>
+              </Form.Label>
               <Form.Select
                 name="trangThai"
                 value={formData.trangThai}
@@ -519,7 +686,9 @@ const PhongManager = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Sức chứa <span className="text-danger">*</span></Form.Label>
+              <Form.Label>
+                Sức chứa <span className="text-danger">*</span>
+              </Form.Label>
               <Form.Control
                 type="number"
                 name="sucChua"
@@ -532,7 +701,9 @@ const PhongManager = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Vị trí <span className="text-danger">*</span></Form.Label>
+              <Form.Label>
+                Vị trí <span className="text-danger">*</span>
+              </Form.Label>
               <Form.Control
                 type="text"
                 name="viTri"
@@ -560,20 +731,29 @@ const PhongManager = () => {
           <Modal.Title>Xác nhận xóa</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Bạn có chắc chắn muốn xóa phòng học <strong>{currentPhong?.maPhong}</strong>?</p>
-          <p className="text-danger">Lưu ý: Hành động này không thể hoàn tác.</p>
+          <p>
+            Bạn có chắc chắn muốn xóa phòng học{" "}
+            <strong>{currentPhong?.maPhong}</strong>?
+          </p>
+          <p className="text-danger">
+            Lưu ý: Hành động này không thể hoàn tác.
+          </p>
           {currentPhong?.trangThai === "DANGSUDUNG" && (
             <p className="text-warning">
-              <strong>Cảnh báo:</strong> Phòng học này đang được sử dụng. Bạn không thể xóa phòng học đang được sử dụng.
+              <strong>Cảnh báo:</strong> Phòng học này đang được sử dụng. Bạn
+              không thể xóa phòng học đang được sử dụng.
             </p>
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowConfirmModal(false)}
+          >
             Hủy
           </Button>
-          <Button 
-            variant="danger" 
+          <Button
+            variant="danger"
             onClick={handleDeletePhong}
             disabled={currentPhong?.trangThai === "DANGSUDUNG"}
           >
@@ -583,7 +763,11 @@ const PhongManager = () => {
       </Modal>
 
       {/* Modal Thống kê phòng học */}
-      <Modal show={showStatsModal} onHide={() => setShowStatsModal(false)} size="lg">
+      <Modal
+        show={showStatsModal}
+        onHide={() => setShowStatsModal(false)}
+        size="lg"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Báo cáo & Thống kê phòng học</Modal.Title>
         </Modal.Header>
@@ -600,7 +784,9 @@ const PhongManager = () => {
                 <Col md={4} className="text-center">
                   <Card className="h-100">
                     <Card.Body>
-                      <h2 className="display-4">{calculateRoomStats().total}</h2>
+                      <h2 className="display-4">
+                        {calculateRoomStats().total}
+                      </h2>
                       <p className="text-muted">Tổng số phòng</p>
                     </Card.Body>
                   </Card>
@@ -608,7 +794,9 @@ const PhongManager = () => {
                 <Col md={4} className="text-center">
                   <Card className="h-100">
                     <Card.Body>
-                      <h2 className="display-4">{calculateRoomStats().totalCapacity}</h2>
+                      <h2 className="display-4">
+                        {calculateRoomStats().totalCapacity}
+                      </h2>
                       <p className="text-muted">Tổng sức chứa</p>
                     </Card.Body>
                   </Card>
@@ -616,13 +804,15 @@ const PhongManager = () => {
                 <Col md={4} className="text-center">
                   <Card className="h-100">
                     <Card.Body>
-                      <h2 className="display-4">{calculateRoomStats().avgCapacity}</h2>
+                      <h2 className="display-4">
+                        {calculateRoomStats().avgCapacity}
+                      </h2>
                       <p className="text-muted">Sức chứa trung bình</p>
                     </Card.Body>
                   </Card>
                 </Col>
               </Row>
-              
+
               <h5 className="mb-3">Thống kê theo trạng thái</h5>
               <Table bordered className="mb-4">
                 <thead>
@@ -634,47 +824,45 @@ const PhongManager = () => {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>
-                      {renderTrangThai("TRONG")} Trống
-                    </td>
+                    <td>{renderTrangThai("TRONG")} Trống</td>
                     <td>{calculateRoomStats().countByStatus.TRONG}</td>
                     <td>
-                      <ProgressBar 
-                        now={calculateRoomStats().percentByStatus.TRONG} 
+                      <ProgressBar
+                        now={calculateRoomStats().percentByStatus.TRONG}
                         label={`${calculateRoomStats().percentByStatus.TRONG}%`}
                         variant="success"
                       />
                     </td>
                   </tr>
                   <tr>
-                    <td>
-                      {renderTrangThai("DANGSUDUNG")} Đang sử dụng
-                    </td>
+                    <td>{renderTrangThai("DANGSUDUNG")} Đang sử dụng</td>
                     <td>{calculateRoomStats().countByStatus.DANGSUDUNG}</td>
                     <td>
-                      <ProgressBar 
-                        now={calculateRoomStats().percentByStatus.DANGSUDUNG} 
-                        label={`${calculateRoomStats().percentByStatus.DANGSUDUNG}%`}
+                      <ProgressBar
+                        now={calculateRoomStats().percentByStatus.DANGSUDUNG}
+                        label={`${
+                          calculateRoomStats().percentByStatus.DANGSUDUNG
+                        }%`}
                         variant="warning"
                       />
                     </td>
                   </tr>
                   <tr>
-                    <td>
-                      {renderTrangThai("BAOTRI")} Bảo trì
-                    </td>
+                    <td>{renderTrangThai("BAOTRI")} Bảo trì</td>
                     <td>{calculateRoomStats().countByStatus.BAOTRI}</td>
                     <td>
-                      <ProgressBar 
-                        now={calculateRoomStats().percentByStatus.BAOTRI} 
-                        label={`${calculateRoomStats().percentByStatus.BAOTRI}%`}
+                      <ProgressBar
+                        now={calculateRoomStats().percentByStatus.BAOTRI}
+                        label={`${
+                          calculateRoomStats().percentByStatus.BAOTRI
+                        }%`}
                         variant="danger"
                       />
                     </td>
                   </tr>
                 </tbody>
               </Table>
-              
+
               <h5 className="mb-3">Thống kê theo loại phòng</h5>
               <Table bordered className="mb-4">
                 <thead>
@@ -685,39 +873,43 @@ const PhongManager = () => {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>
-                      {renderLoaiPhong("HOC")} Phòng học
-                    </td>
+                    <td>{renderLoaiPhong("HOC")} Phòng học</td>
                     <td>{calculateRoomStats().countByType.HOC}</td>
                   </tr>
                   <tr>
-                    <td>
-                      {renderLoaiPhong("THUCHANH")} Phòng thực hành
-                    </td>
+                    <td>{renderLoaiPhong("THUCHANH")} Phòng thực hành</td>
                     <td>{calculateRoomStats().countByType.THUCHANH}</td>
                   </tr>
                 </tbody>
               </Table>
-              
+
               <h5 className="mb-3">Tỷ lệ sử dụng phòng học</h5>
               <Card className="mb-4">
                 <Card.Body>
-                  <h4 className="text-center">{calculateRoomStats().utilizationRate}%</h4>
-                  <ProgressBar 
-                    now={calculateRoomStats().utilizationRate} 
+                  <h4 className="text-center">
+                    {calculateRoomStats().utilizationRate}%
+                  </h4>
+                  <ProgressBar
+                    now={calculateRoomStats().utilizationRate}
                     variant={
-                      calculateRoomStats().utilizationRate < 30 ? "success" : 
-                      calculateRoomStats().utilizationRate < 70 ? "warning" : "danger"
+                      calculateRoomStats().utilizationRate < 30
+                        ? "success"
+                        : calculateRoomStats().utilizationRate < 70
+                        ? "warning"
+                        : "danger"
                     }
                     style={{ height: "30px" }}
                   />
                   <div className="text-muted mt-2 text-center">
-                    {calculateRoomStats().utilizationRate < 30 ? "Tỷ lệ sử dụng thấp" : 
-                     calculateRoomStats().utilizationRate < 70 ? "Tỷ lệ sử dụng trung bình" : "Tỷ lệ sử dụng cao"}
+                    {calculateRoomStats().utilizationRate < 30
+                      ? "Tỷ lệ sử dụng thấp"
+                      : calculateRoomStats().utilizationRate < 70
+                      ? "Tỷ lệ sử dụng trung bình"
+                      : "Tỷ lệ sử dụng cao"}
                   </div>
                 </Card.Body>
               </Card>
-              
+
               <h5 className="mb-3">Thống kê tần suất mượn phòng</h5>
               <div className="table-responsive">
                 <Table striped bordered hover className="mb-0">
@@ -782,4 +974,4 @@ const PhongManager = () => {
   );
 };
 
-export default PhongManager; 
+export default PhongManager;
