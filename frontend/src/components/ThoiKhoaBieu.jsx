@@ -37,6 +37,13 @@ function ThoiKhoaBieu({ data, currentUser, isGiangVien }) {
   const [studentList, setStudentList] = useState([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
 
+  // Variables for schedule changing feature
+  const [selectedLesson, setSelectedLesson] = useState(null);
+  const [showReSchedule, setShowReSchedule] = useState(false);
+  const [startPeriod, setStartPeriod] = useState('');
+  const [endPeriod, setEndPeriod] = useState('');
+  const [studyDate, setStudyDate] = useState('');
+
   useEffect(() => {
     // If data is provided directly, use it
     if (data && Array.isArray(data)) {
@@ -60,14 +67,6 @@ function ThoiKhoaBieu({ data, currentUser, isGiangVien }) {
     if (!currentUser) return;
     
     setLoading(true);
-
-    const fetchSchedule = () => {
-      if (isGiangVien) {
-        return UserService.getLichDayGiangVien(currentWeek);
-      } else {
-        return UserService.getLichHocLopTheoTuan(currentWeek);
-      }
-    };
     
     fetchSchedule()
       .then((response) => {
@@ -92,6 +91,14 @@ function ThoiKhoaBieu({ data, currentUser, isGiangVien }) {
       });
   }, [currentUser, currentWeek, isGiangVien, data]);
 
+  const fetchSchedule = () => {
+    if (isGiangVien) {
+      return UserService.getLichDayGiangVien(currentWeek);
+    } else {
+      return UserService.getLichHocLopTheoTuan(currentWeek);
+    }
+  };
+
   const handleViewStudents = async (maLop, tenLop) => {
     if (!maLop) return;
     
@@ -111,10 +118,22 @@ function ThoiKhoaBieu({ data, currentUser, isGiangVien }) {
     }
   };
 
+  const handleViewReSchedule = (lesson) => {
+    if (!lesson) return;
+    
+    setSelectedLesson(lesson);
+    setShowReSchedule(true);
+  }
+
   const handleCloseModal = () => {
     setShowStudentList(false);
     setSelectedClass(null);
     setStudentList([]);
+  };
+
+  const handleCloseReScheduleModal = () => {
+    setShowReSchedule(false);
+    setSelectedLesson(null);
   };
 
   const goToPreviousWeek = () => setCurrentWeek((prev) => prev - 1);
@@ -157,6 +176,60 @@ function ThoiKhoaBieu({ data, currentUser, isGiangVien }) {
     acc[dayOfWeek] = scheduleData.filter(item => item.thuTrongTuan === dayOfWeek);
     return acc;
   }, {});
+
+  const handleReScheduleSave = async () => {
+    if (!selectedLesson) return;
+  
+    const requestData = {
+      maTKB: selectedLesson.maTKB,
+      tietBatDau: Number(startPeriod),
+      tietKetThuc: Number(endPeriod),
+      ngayHoc: studyDate,
+    };
+  
+    try {
+      await UserService.requestReschedule(requestData);
+      toast.success("Đã thay đổi lịch dạy thành công!");
+      
+      fetchSchedule()
+      .then((response) => {
+        if (response.data && response.data.length > 0) {
+          // Chuẩn hóa dữ liệu
+          const normalizedData = response.data.map(item => ({
+            ...item,
+            tietBatDau: parseInt(item.tietBatDau),
+            tietKetThuc: parseInt(item.tietKetThuc),
+            tuan: parseInt(item.tuan)
+          }));
+          
+          setSchedule(normalizedData);
+        } else {
+          setSchedule(response.data || []);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        handleError(`Không thể tải lịch ${isGiangVien ? "dạy" : "học"}. Vui lòng thử lại sau.`);
+        setLoading(false);
+      });
+
+      handleCloseReScheduleModal(); // đóng modal
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+        // Trả về nội dung lỗi từ backend (ví dụ: "Lịch dạy bị trùng với thời khóa biểu khác!")
+        toast.error(error.response.data);
+      }
+      else if (error.response.data === "Không thể chỉnh lịch dạy về quá khứ" && error.response.status === 400) {
+        // Trả về nội dung lỗi từ backend
+        toast.error(error.response.data);
+
+      } else {
+        toast.error("Không thể thay đổi lịch dạy. Vui lòng thử lại.");
+      }
+      console.error("Lỗi gửi yêu cầu:", error);
+    }
+  };
+  
 
   return (
     <Card className="schedule-container">
@@ -287,6 +360,17 @@ function ThoiKhoaBieu({ data, currentUser, isGiangVien }) {
                                     >
                                       <FaUsers className="me-1" /> Xem danh sách SV
                                     </Button>
+                                    <Button
+                                      variant="primary"
+                                      size="sm"
+                                      className="view-students-btn mt-2"
+                                      onClick={() => handleViewReSchedule(lesson)}
+                                      style={{
+                                        display: new Date(lesson.ngayHoc) >= new Date() ? "inline-block" : "none",
+                                      }}
+                                    >
+                                      <FaCalendarAlt className="me-1" /> Thay đổi lịch dạy
+                                    </Button>
                                   </>
                                 )) :
                                 (lesson.giangVien && (
@@ -354,6 +438,86 @@ function ThoiKhoaBieu({ data, currentUser, isGiangVien }) {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>
+            Đóng
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Modal form thay đổi lịch dạy */}
+      <Modal show={showReSchedule} onHide={handleCloseReScheduleModal} size="lg">
+        <Modal.Header closeButton className="student-list-header">
+          <Modal.Title>
+            <FaUsers className="me-2" />
+            Thay đổi lịch dạy lớp {selectedClass?.tenLop || selectedClass?.maLop}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+        <form>
+          <div className="mb-3">
+            <label htmlFor="startPeriod" className="form-label">Tiết bắt đầu</label>
+            <input
+              type="number"
+              className="form-control"
+              id="startPeriod"
+              min="1"
+              max="14"
+              defaultValue={selectedLesson?.tietBatDau}
+              placeholder="Nhập tiết bắt đầu"
+              value={startPeriod}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+                if (value >= 1 && value <= 14) {
+                  setStartPeriod(value);
+                } else {
+                  toast.error("Tiết bắt đầu phải nằm trong khoảng từ 1 đến 14.");
+                }
+              }}
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="endPeriod" className="form-label">Tiết kết thúc</label>
+            <input
+              type="number"
+              className="form-control"
+              id="endPeriod"
+              min="1"
+              max="14"
+              defaultValue={selectedLesson?.tietKetThuc}
+              placeholder="Nhập tiết kết thúc"
+              value={endPeriod}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+                if (value >= 1 && value <= 14) {
+                  if (startPeriod && value < startPeriod) {
+                    toast.error("Tiết kết thúc phải lớn hơn hoặc bằng tiết bắt đầu.");
+                  } else {
+                    setEndPeriod(value);
+                  }
+                } else {
+                  toast.error("Tiết kết thúc phải nằm trong khoảng từ 1 đến 14.");
+                }
+              }}
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="studyDate" className="form-label">Ngày học</label>
+            <input
+              type="date"
+              className="form-control"
+              id="studyDate"
+              defaultValue={selectedLesson?.ngayHoc}
+              value={studyDate}
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(e) => setStudyDate(e.target.value)}
+            />
+          </div>
+        </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleReScheduleSave}>
+            Lưu
+          </Button>
+          <Button variant="secondary" onClick={handleCloseReScheduleModal}>
             Đóng
           </Button>
         </Modal.Footer>

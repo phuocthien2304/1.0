@@ -343,7 +343,11 @@ class UserService {
       loaiPhong
     };
     return api.get('/yeucaumuon/phongtrong', { params });
-  }  
+  }
+
+  requestReschedule(params) {
+    return api.put('/giangvien/doilichday', params);
+  }
 }
 
 export default new UserService(); 

@@ -1,6 +1,7 @@
 package com.example.backend.controllers;
 
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Arrays;
+import java.util.Calendar;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +37,10 @@ import com.example.backend.model.Phong;
 import com.example.backend.model.SinhVien;
 import com.example.backend.model.ThoiKhoaBieu;
 import com.example.backend.model.YeuCauMuonPhong;
+import com.example.backend.model.YeuCauMuonPhong.TrangThai;
 import com.example.backend.model.ThongBaoGui;
 import com.example.backend.model.ThongBaoNhan;
+import com.example.backend.payload.request.DoiLichDayRequest;
 import com.example.backend.payload.request.PhanHoiRequest;
 import com.example.backend.payload.request.YeuCauMuonPhongRequest;
 import com.example.backend.payload.request.ThongBaoRequest;
@@ -1039,6 +1044,116 @@ public class GiangVienController {
         
         return ResponseEntity.ok(response);
     }
+    
+    // 20. Thay đổi lịch giảng dạy
+    @PutMapping("/doilichday")
+    @PreAuthorize("hasRole('GV')")
+    public ResponseEntity<?> thayDoiLichDay(@RequestBody DoiLichDayRequest doiLichDayRequest) {
+        
+        Optional<ThoiKhoaBieu> optionalTKB = thoiKhoaBieuRepository.findById(doiLichDayRequest.getMaTKB());
+
+        if (optionalTKB.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Không tìm thấy thời khóa biểu với mã: " + doiLichDayRequest.getMaTKB());
+        }
+
+        ThoiKhoaBieu tkb = optionalTKB.get();
+
+        List<ThoiKhoaBieu> lichTrung = thoiKhoaBieuRepository
+            .findByNgayHocAndPhongAndMaTKBNotAndTietBatDauLessThanEqualAndTietKetThucGreaterThanEqual(
+                doiLichDayRequest.getNgayHoc(),
+                tkb.getPhong(),
+                doiLichDayRequest.getMaTKB(),
+                doiLichDayRequest.getTietKetThuc(),
+                doiLichDayRequest.getTietBatDau()
+            );
+        
+        Date now = new Date();
+	
+	    // Tính giờ bắt đầu từ tiết
+	    Date gioBatDau = getTimeFromTiet(doiLichDayRequest.getTietBatDau(), doiLichDayRequest.getNgayHoc());
+	    Date gioKetThuc = getTimeFromTiet(doiLichDayRequest.getTietKetThuc(), doiLichDayRequest.getNgayHoc());
+	    Date gioBatDauCu = getTimeFromTiet(tkb.getTietBatDau(), tkb.getNgayHoc());
+	    
+//		if (gioBatDauCu.before(now)) {
+//		    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//		        .body("Không thể chỉnh lịch dạy đã qua");
+//		}
+		
+		if (gioBatDau.before(now)) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			        .body("Không thể chỉnh lịch dạy về quá khứ");
+		}
+
+        if (!lichTrung.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Không thể thay đổi lịch dạy. Lịch dạy mong muốn bị trùng với lịch dạy khác!");
+        }
+        
+        List<YeuCauMuonPhong> yeuCauTrung = yeuCauMuonPhongRepository.findByPhongAndTrangThaiNotAndThoiGianTraGreaterThanAndThoiGianMuonLessThan(tkb.getPhong(), TrangThai.KHONGDUOCDUYET, gioBatDau, gioKetThuc);
+
+        if (!yeuCauTrung.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("Không thể đổi lịch dạy vì phòng đã có người đặt trước trong khoảng thời gian này.");
+        }
+
+        // Cập nhật thông tin
+        tkb.setTietBatDau(doiLichDayRequest.getTietBatDau());
+        tkb.setTietKetThuc(doiLichDayRequest.getTietKetThuc());
+        tkb.setNgayHoc(doiLichDayRequest.getNgayHoc());
+        tkb.setTuan(getISOWeekNumber(doiLichDayRequest.getNgayHoc()));
+        
+        // ✅ Tính và set lại thứ trong tuần
+        ThoiKhoaBieu.ThuTrongTuan thu = getThuTrongTuanFromDate(doiLichDayRequest.getNgayHoc());
+        tkb.setThuTrongTuan(thu);
+        
+        thoiKhoaBieuRepository.save(tkb);
+
+        return ResponseEntity.ok("Đổi lịch thành công");
+    }
+
+    
+    private ThoiKhoaBieu.ThuTrongTuan getThuTrongTuanFromDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK); // Sunday = 1, Saturday = 7
+
+        // Map dayOfWeek Java -> Enum
+        return switch (dayOfWeek) {
+            case Calendar.MONDAY -> ThoiKhoaBieu.ThuTrongTuan.MON;
+            case Calendar.TUESDAY -> ThoiKhoaBieu.ThuTrongTuan.TUE;
+            case Calendar.WEDNESDAY -> ThoiKhoaBieu.ThuTrongTuan.WED;
+            case Calendar.THURSDAY -> ThoiKhoaBieu.ThuTrongTuan.THU;
+            case Calendar.FRIDAY -> ThoiKhoaBieu.ThuTrongTuan.FRI;
+            case Calendar.SATURDAY -> ThoiKhoaBieu.ThuTrongTuan.SAT;
+            case Calendar.SUNDAY -> ThoiKhoaBieu.ThuTrongTuan.SUN;
+            default -> throw new IllegalArgumentException("Ngày không hợp lệ!");
+        };
+    }
+
+    private Date getTimeFromTiet(int tiet, Date ngayHoc) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(ngayHoc);
+        cal.set(Calendar.HOUR_OF_DAY, 7 + tiet - 1); // bắt đầu từ 7h, mỗi tiết +1h
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
+    }
+    
+    public int getISOWeekNumber(Date date) {
+        // Tạo calendar từ ngày truyền vào
+        Calendar calendar = GregorianCalendar.getInstance();
+
+        // Cấu hình chuẩn ISO: tuần bắt đầu từ Thứ Hai
+        calendar.setFirstDayOfWeek(Calendar.MONDAY);
+        calendar.setMinimalDaysInFirstWeek(4); // ISO: tuần 1 phải có ít nhất 4 ngày
+
+        calendar.setTime(date);
+
+        return calendar.get(Calendar.WEEK_OF_YEAR);
+    }
+
     
     // Phương thức hỗ trợ chuyển đổi Object sang Integer
     // private Integer convertToInteger(Object value) {

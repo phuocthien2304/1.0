@@ -1,10 +1,12 @@
 package com.example.backend.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.example.backend.model.Phong;
 import com.example.backend.model.ThoiKhoaBieu;
 
 @Repository
@@ -14,4 +16,13 @@ public interface ThoiKhoaBieuRepository extends JpaRepository<ThoiKhoaBieu, Inte
     List<ThoiKhoaBieu> findByPhongMaPhong(String maPhong);
     List<ThoiKhoaBieu> findByLopHocMaLopAndTuan(String maLop, Integer tuan);
     List<ThoiKhoaBieu> findByGiangVienMaGVAndTuan(String maGV, Integer tuan);
+    
+    List<ThoiKhoaBieu> findByNgayHocAndPhongAndMaTKBNotAndTietBatDauLessThanEqualAndTietKetThucGreaterThanEqual(
+    	    Date ngayHoc,
+    	    Phong phong,
+    	    Integer maTKB,
+    	    Integer tietKetThuc,
+    	    Integer tietBatDau
+    	);
+
 } 

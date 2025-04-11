@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.backend.model.YeuCauMuonPhong;
+import com.example.backend.model.YeuCauMuonPhong.TrangThai;
 import com.example.backend.model.NguoiDung;
 import com.example.backend.model.Phong;
 
@@ -75,4 +76,12 @@ public interface YeuCauMuonPhongRepository extends JpaRepository<YeuCauMuonPhong
             @Param("phong") Phong phong,
             @Param("startTime") Date startTime,
             @Param("endTime") Date endTime);
+    
+    List<YeuCauMuonPhong> findByPhongAndTrangThaiNotAndThoiGianTraGreaterThanAndThoiGianMuonLessThan(
+    	    Phong phong,
+    	    TrangThai trangThai,
+    	    Date gioBatDau,
+    	    Date gioKetThuc
+    	);
+
 }
