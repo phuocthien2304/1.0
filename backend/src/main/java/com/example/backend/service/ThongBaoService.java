@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,23 +12,36 @@ import com.example.backend.model.NguoiDung;
 import com.example.backend.model.SinhVien;
 import com.example.backend.model.ThongBaoGui;
 import com.example.backend.repository.ThongBaoNhanRepository;
+
+import jakarta.annotation.PostConstruct;
+
 import com.example.backend.model.MonHoc;
 import com.example.backend.model.ThoiKhoaBieu;
 import com.example.backend.repository.NguoiDungRepository;
 import com.example.backend.repository.SinhVienRepository;
+import com.example.backend.repository.ThoiKhoaBieuRepository;
 import com.example.backend.repository.GiangVienRepository;
 import com.example.backend.repository.ThongBaoGuiRepository;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 @Service
 public class ThongBaoService {
@@ -49,6 +63,9 @@ public class ThongBaoService {
     
     @Autowired
     private EmailService emailService;
+    
+    @Autowired
+    private ThoiKhoaBieuRepository thoiKhoaBieuRepository;
 
     @Transactional
     public void danhDauDaDoc(Integer id) {
@@ -253,5 +270,113 @@ public class ThongBaoService {
         		emailService.sendSimpleEmail(tbNhan.getNguoiNhan().getEmail(), tieuDe, noiDung);
         	}
         }    	
+    }
+    
+    private Set<Integer> danhSachDaDatNhacNho = new HashSet<>();
+
+    @Scheduled(cron = "0 0 0 * * ?") // Mỗi ngày lúc 00:00
+//    @Scheduled(fixedRate = 1 * 60 * 1000) // For testing
+    public void loadVaDatLichNhacNho() {
+        System.out.println("📅 Đang tải lịch và đặt nhắc nhở...");
+
+        Date ngayHienTai = new Date();
+        List<ThoiKhoaBieu> danhSach = thoiKhoaBieuRepository.findByNgayHoc(ngayHienTai);
+
+        for (ThoiKhoaBieu tkb : danhSach) {
+            Integer id = tkb.getMaTKB(); // giả sử đây là id duy nhất của lịch
+
+            if (danhSachDaDatNhacNho.contains(id)) {
+                continue; // đã đặt rồi, bỏ qua
+            }
+
+            Date gioBatDau = getTimeFromTiet(tkb.getTietBatDau(), tkb.getNgayHoc());
+            long delay = gioBatDau.getTime() - System.currentTimeMillis() - (30 * 60 * 1000);
+
+            if (delay > 0) {
+                ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+                scheduler.schedule(() -> {
+                    guiEmailNhacNho(tkb);
+                }, delay, TimeUnit.MILLISECONDS);
+
+                danhSachDaDatNhacNho.add(id);
+            }
+        }
+    }
+
+    private void guiEmailNhacNho(ThoiKhoaBieu tkb) {
+        String tenMon = tkb.getMonHoc().getTenMon();
+        String maPhong = tkb.getPhong().getMaPhong();
+        String emailGV = tkb.getGiangVien().getNguoiDung().getEmail();
+        String tenGV = tkb.getGiangVien().getNguoiDung().getHoTen();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd-MM-yyyy");
+        String gioFormatted = sdf.format(getTimeFromTiet(tkb.getTietBatDau(), tkb.getNgayHoc()));
+
+        String tieuDe = "⏰ Nhắc nhở: Sắp đến giờ dạy";
+        String noiDung = String.format("""
+            Xin chào %s,
+
+            Đây là nhắc nhở lịch dạy sắp tới:
+            • Môn: %s
+            • Phòng: %s
+            • Thời gian bắt đầu: %s
+
+            Vui lòng chuẩn bị trước giờ dạy.
+            """, tenGV, tenMon, maPhong, gioFormatted);
+
+        emailService.sendSimpleEmail(emailGV, tieuDe, noiDung);
+
+        System.out.println("📧 Đã gửi email nhắc nhở cho " + tenGV + " (" + emailGV + ")");
+    }
+
+    public void capNhatLichNhacNho(Integer maTKB) {
+        // Kiểm tra nếu đã có lịch nhắc nhở cho maTKB, nếu có thì hủy
+        if (danhSachDaDatNhacNho.contains(maTKB)) {
+            System.out.println("🔄 Hủy nhắc nhở cũ cho TKB " + maTKB);
+
+            // Hủy lịch nhắc nhở cũ
+            danhSachDaDatNhacNho.remove(maTKB);
+        }
+
+        // Lấy thông tin lịch học mới từ cơ sở dữ liệu
+        ThoiKhoaBieu tkb = thoiKhoaBieuRepository.findById(maTKB).orElse(null);
+
+        if (tkb == null) {
+            System.out.println("⚠️ Không tìm thấy TKB với maTKB " + maTKB);
+            return;
+        }
+
+        // Tính toán lại thời gian nhắc nhở mới
+        Date gioBatDau = getTimeFromTiet(tkb.getTietBatDau(), tkb.getNgayHoc());
+        long delay = gioBatDau.getTime() - System.currentTimeMillis() - (30 * 60 * 1000);  // 30 phút trước giờ học
+
+        if (delay > 0) {
+            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+            scheduler.schedule(() -> {
+                guiEmailNhacNho(tkb);  // Gửi email nhắc nhở
+            }, delay, TimeUnit.MILLISECONDS);
+
+            // Thêm maTKB vào danh sách nhắc nhở đã đặt
+            danhSachDaDatNhacNho.add(maTKB);
+            System.out.println("✅ Đã đặt lại nhắc nhở cho TKB " + maTKB);
+        } else {
+            System.out.println("⚠️ Không đặt nhắc nhở vì đã quá thời gian cho TKB " + maTKB);
+        }
+    }
+
+
+    @PostConstruct
+    public void runAfterStartup() {
+    	loadVaDatLichNhacNho();
+    }
+
+    private Date getTimeFromTiet(int tiet, Date ngayHoc) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(ngayHoc);
+        cal.set(Calendar.HOUR_OF_DAY, 7 + tiet - 1); // bắt đầu từ 7h, mỗi tiết +1h
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
     }
 } 

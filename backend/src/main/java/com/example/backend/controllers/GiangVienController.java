@@ -1125,6 +1125,7 @@ public class GiangVienController {
         
         thoiKhoaBieuRepository.save(tkb);
         thongBaoService.thongBaoThayDoiTKB(tkbCu, tkb);
+        thongBaoService.capNhatLichNhacNho(tkb.getMaTKB());
 
         return ResponseEntity.ok("Đổi lịch thành công");
     }

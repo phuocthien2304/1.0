@@ -16,7 +16,6 @@ public interface ThoiKhoaBieuRepository extends JpaRepository<ThoiKhoaBieu, Inte
     List<ThoiKhoaBieu> findByPhongMaPhong(String maPhong);
     List<ThoiKhoaBieu> findByLopHocMaLopAndTuan(String maLop, Integer tuan);
     List<ThoiKhoaBieu> findByGiangVienMaGVAndTuan(String maGV, Integer tuan);
-    
     List<ThoiKhoaBieu> findByNgayHocAndPhongAndMaTKBNotAndTietBatDauLessThanEqualAndTietKetThucGreaterThanEqual(
     	    Date ngayHoc,
     	    Phong phong,
@@ -24,5 +23,6 @@ public interface ThoiKhoaBieuRepository extends JpaRepository<ThoiKhoaBieu, Inte
     	    Integer tietKetThuc,
     	    Integer tietBatDau
     	);
+	List<ThoiKhoaBieu> findByNgayHoc(Date date);
 
 } 
