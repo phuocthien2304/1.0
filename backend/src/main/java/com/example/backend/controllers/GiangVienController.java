@@ -56,6 +56,7 @@ import com.example.backend.repository.ThoiKhoaBieuRepository;
 import com.example.backend.repository.YeuCauMuonPhongRepository;
 import com.example.backend.repository.ThongBaoGuiRepository;
 import com.example.backend.repository.ThongBaoNhanRepository;
+import com.example.backend.service.ThongBaoService;
 import com.example.backend.service.UserDetailsImpl;
 import com.example.backend.model.SuCo;
 import com.example.backend.repository.SuCoRepository;
@@ -100,6 +101,9 @@ public class GiangVienController {
     
     @Autowired
     private SuCoRepository suCoRepository;
+    
+    @Autowired
+    private ThongBaoService thongBaoService;
     
     // Helper method to get current authenticated lecturer
     private GiangVien getCurrentGiangVien() {
@@ -1058,6 +1062,18 @@ public class GiangVienController {
         }
 
         ThoiKhoaBieu tkb = optionalTKB.get();
+        
+	     // Thời khóa biểu cũ cho chức năng Thông báo
+        ThoiKhoaBieu tkbCu = new ThoiKhoaBieu();
+        tkbCu.setPhong(tkb.getPhong());
+        tkbCu.setLopHoc(tkb.getLopHoc());
+        tkbCu.setMonHoc(tkb.getMonHoc());
+        tkbCu.setGiangVien(tkb.getGiangVien());
+        tkbCu.setThuTrongTuan(tkb.getThuTrongTuan());
+        tkbCu.setTietBatDau(tkb.getTietBatDau());
+        tkbCu.setTietKetThuc(tkb.getTietKetThuc());
+        tkbCu.setTuan(tkb.getTuan());
+        tkbCu.setNgayHoc(tkb.getNgayHoc());
 
         List<ThoiKhoaBieu> lichTrung = thoiKhoaBieuRepository
             .findByNgayHocAndPhongAndMaTKBNotAndTietBatDauLessThanEqualAndTietKetThucGreaterThanEqual(
@@ -1073,7 +1089,7 @@ public class GiangVienController {
 	    // Tính giờ bắt đầu từ tiết
 	    Date gioBatDau = getTimeFromTiet(doiLichDayRequest.getTietBatDau(), doiLichDayRequest.getNgayHoc());
 	    Date gioKetThuc = getTimeFromTiet(doiLichDayRequest.getTietKetThuc(), doiLichDayRequest.getNgayHoc());
-	    Date gioBatDauCu = getTimeFromTiet(tkb.getTietBatDau(), tkb.getNgayHoc());
+//	    Date gioBatDauCu = getTimeFromTiet(tkb.getTietBatDau(), tkb.getNgayHoc());
 	    
 //		if (gioBatDauCu.before(now)) {
 //		    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -1108,6 +1124,7 @@ public class GiangVienController {
         tkb.setThuTrongTuan(thu);
         
         thoiKhoaBieuRepository.save(tkb);
+        thongBaoService.thongBaoThayDoiTKB(tkbCu, tkb);
 
         return ResponseEntity.ok("Đổi lịch thành công");
     }

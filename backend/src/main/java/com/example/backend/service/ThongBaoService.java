@@ -11,6 +11,8 @@ import com.example.backend.model.NguoiDung;
 import com.example.backend.model.SinhVien;
 import com.example.backend.model.ThongBaoGui;
 import com.example.backend.repository.ThongBaoNhanRepository;
+import com.example.backend.model.MonHoc;
+import com.example.backend.model.ThoiKhoaBieu;
 import com.example.backend.repository.NguoiDungRepository;
 import com.example.backend.repository.SinhVienRepository;
 import com.example.backend.repository.GiangVienRepository;
@@ -22,6 +24,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Optional;
 import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 @Service
@@ -41,6 +46,9 @@ public class ThongBaoService {
 
     @Autowired
     private ThongBaoGuiRepository thongBaoGuiRepository;
+    
+    @Autowired
+    private EmailService emailService;
 
     @Transactional
     public void danhDauDaDoc(Integer id) {
@@ -192,5 +200,58 @@ public class ThongBaoService {
         }
         
         return thongBaoGui;
+    }
+    
+    public void thongBaoThayDoiTKB(ThoiKhoaBieu tkbCu, ThoiKhoaBieu tkbMoi) {
+    	SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+    	
+    	String tieuDe = "";
+    	String noiDung = "";
+    	String ngayCu = formatter.format(tkbCu.getNgayHoc());
+    	String ngayMoi = formatter.format(tkbMoi.getNgayHoc());
+    	MonHoc mon = tkbCu.getMonHoc();
+    	int tietBatDauCu = tkbCu.getTietBatDau();
+    	int tietBatDauMoi = tkbMoi.getTietBatDau();
+    	int tietKetThucCu = tkbCu.getTietKetThuc();
+    	int tietKetThucMoi = tkbMoi.getTietKetThuc();
+    	
+    	boolean ngayThayDoi = !ngayCu.equals(ngayMoi);
+    	boolean tietThayDoi = tietBatDauCu != tietBatDauMoi || tietKetThucCu != tietKetThucMoi;
+    	
+    	if (ngayThayDoi) {
+            tieuDe = "Thay đổi lịch học: " + mon.getTenMon() + " - " + mon.getMaMon();
+            noiDung = String.format(
+                "Lịch học cho môn %s (%s) vào ngày %s (tiết %d - %d) sẽ được dời sang ngày %s (tiết %d - %d)",
+                mon.getTenMon(), mon.getMaMon(),
+                ngayCu, tietBatDauCu, tietKetThucCu,
+                ngayMoi, tietBatDauMoi, tietKetThucMoi
+            );
+        } else if (tietThayDoi) {
+        	tieuDe = "Thay đổi tiết học: " + mon.getTenMon() + " - " + mon.getMaMon();
+            noiDung = String.format(
+                "Tiết học cho môn %s (%s) vào ngày %s sẽ được đổi sang tiết %s - %s",
+                mon.getTenMon(), mon.getMaMon(), ngayCu, tietBatDauMoi, tietKetThucMoi
+            );
+        }
+        
+        if (!tieuDe.isEmpty() && !noiDung.isEmpty()) {
+        	ThongBaoGui tbGui = new ThongBaoGui();
+        	tbGui.setNguoiGui(tkbCu.getGiangVien().getNguoiDung());
+        	tbGui.setTieuDe(tieuDe);
+        	tbGui.setNoiDung(noiDung);
+        	tbGui.setThoiGian(new Date());
+        	thongBaoGuiRepository.save(tbGui);
+        	
+        	List<SinhVien> dssv = sinhVienRepository.findByLopHocMaLop(tkbCu.getLopHoc().getMaLop());
+        	for (SinhVien sv : dssv) {
+        		ThongBaoNhan tbNhan = new ThongBaoNhan();
+        		tbNhan.setNguoiNhan(sv.getNguoiDung());
+        		tbNhan.setThongBaoGui(tbGui);
+        		tbNhan.setTrangThai(TrangThai.CHUADOC);
+        		
+        		thongBaoNhanRepository.save(tbNhan);
+        		emailService.sendSimpleEmail(tbNhan.getNguoiNhan().getEmail(), tieuDe, noiDung);
+        	}
+        }    	
     }
 } 
