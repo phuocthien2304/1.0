@@ -120,7 +120,10 @@ function ThoiKhoaBieu({ data, currentUser, isGiangVien }) {
 
   const handleViewReSchedule = (lesson) => {
     if (!lesson) return;
+    const maLop = lesson.lopHoc.maLop || "";
+    const tenLop = lesson.lopHoc.tenLop || "";
     
+    setSelectedClass({ maLop, tenLop });
     setSelectedLesson(lesson);
     setShowReSchedule(true);
   }
