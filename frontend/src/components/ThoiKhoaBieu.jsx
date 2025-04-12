@@ -468,6 +468,10 @@ function ThoiKhoaBieu({ data, currentUser, isGiangVien }) {
                 const value = Number(e.target.value);
                 if (value >= 1 && value <= 14) {
                   setStartPeriod(value);
+                  // Tự động đặt Tiết kết thúc bằng Tiết bắt đầu nếu chưa có giá trị
+                  if (!endPeriod || endPeriod < value) {
+                    setEndPeriod(value);
+                  }
                 } else {
                   toast.error("Tiết bắt đầu phải nằm trong khoảng từ 1 đến 14.");
                 }
