@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faReply, faFlag, faCalendarCheck, faCalendarTimes, faCheckCircle, faTimesCircle, faFilter, faSearch, faCalendarAlt, faSync } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import UserService from "../services/user.service";
+import ThongKeTanSuatPhong from './ThongKeTanSuatPhong';
 
 const API_URL = "http://localhost:8080/api/quanly";
 
@@ -278,6 +279,7 @@ const BoardAdmin = () => {
                 <ListGroup.Item action eventKey="lichsumuon">Lịch sử mượn phòng</ListGroup.Item>
                 <ListGroup.Item action eventKey="baocao">Thống kê phản hồi</ListGroup.Item>
                 <ListGroup.Item action eventKey="suco">Quản lý sự cố</ListGroup.Item>
+                <ListGroup.Item action eventKey="thong-ke-tan-suat">Thống kê tần suất mượn phòng</ListGroup.Item>
             </ListGroup>
           </Card>
         </Col>
@@ -819,6 +821,9 @@ const BoardAdmin = () => {
               </Tab.Pane>
               <Tab.Pane eventKey="suco">
                 <SuCoManager refreshKey={refreshKey} />
+              </Tab.Pane>
+              <Tab.Pane eventKey="thong-ke-tan-suat">
+                <ThongKeTanSuatPhong />
               </Tab.Pane>
             </Tab.Content>
           </Col>

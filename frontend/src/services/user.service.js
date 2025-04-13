@@ -373,6 +373,59 @@ class UserService {
     
     return api.get(url);
   }
+
+  // API thống kê tần suất sử dụng phòng
+  getThongKeTanSuatPhong(loaiThongKe, tuNgay, denNgay) {
+    // Tạo URL với tham số lọc (sử dụng API hoạt động)
+    let url = '/quanly/phong/thongke';
+    
+    console.log(`Gọi API thống kê tần suất sử dụng phòng: ${url}`);
+    
+    return api.get(url)
+      .then(response => {
+        console.log('Dữ liệu thống kê từ API:', response.data);
+        
+        // Chuyển đổi dữ liệu từ API phong/thongke sang định dạng cần thiết
+        const danhSachPhong = response.data.map(p => p.maPhong);
+        const thongKeTheoPhong = {};
+        response.data.forEach(phong => {
+          thongKeTheoPhong[phong.maPhong] = phong.approvedBookings || 0;
+        });
+        
+        // Lấy số yêu cầu đã duyệt làm cơ sở
+        const thongKeTheoThoiGian = [];
+        const timeLabels = [];
+        
+        // Tạo dữ liệu kết quả
+        const transformedData = {
+          thongKeTheoPhong: thongKeTheoPhong,
+          thongKeTheoThoiGian: [],
+          danhSachPhong: danhSachPhong,
+          nhanThoiGian: [],
+          loaiThongKe: loaiThongKe || 'TUAN',
+          isLimitedData: true // Đánh dấu rằng đây là dữ liệu hạn chế
+        };
+        
+        return { data: transformedData };
+      })
+      .catch(error => {
+        console.error('Lỗi khi lấy thống kê tần suất phòng:', error);
+        console.error('Chi tiết lỗi:', error.response ? error.response.data : error.message);
+        
+        // Tạo dữ liệu trống nếu có lỗi
+        return { 
+          data: {
+            thongKeTheoPhong: {},
+            thongKeTheoThoiGian: [],
+            danhSachPhong: [],
+            nhanThoiGian: [],
+            loaiThongKe: loaiThongKe || 'TUAN',
+            isLimitedData: true,
+            error: true
+          } 
+        };
+      });
+  }
 }
 
 export default new UserService(); 
