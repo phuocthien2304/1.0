@@ -255,7 +255,19 @@ public class GiangVienController {
             giangVien.getNguoiDung(),
             Arrays.asList(YeuCauMuonPhong.TrangThai.DADUYET, YeuCauMuonPhong.TrangThai.DANGXULY)
         );
+        
+        List<ThoiKhoaBieu> lichTkbTrung = thoiKhoaBieuRepository.findByPhong_MaPhongAndNgayHocAndTietKetThucGreaterThanAndTietBatDauLessThan(
+        		yeuCauRequest.getMaPhong(),
+        		yeuCauRequest.getThoiGianMuon(),
+        		getTietFromTime(yeuCauRequest.getThoiGianMuon()), 
+        		getTietFromTime(yeuCauRequest.getThoiGianTra()));
+        
+        if (!lichTkbTrung.isEmpty()) {
+        	return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new MessageResponse("Không thể đăng ký mượn phòng vì đã có lịch dạy trong khoảng thời gian này."));
+        }
 
+        // Kiểm tra xem có yêu cầu nào chưa có lịch sử mượn không
         int coYeuCauChuaCoLichSu = 0;
         for (YeuCauMuonPhong yeuCau : yeuCauHienTai) {
             List<LichSuMuonPhong> lichSu = lichSuMuonPhongRepository.findByYeuCauMuonPhong(yeuCau);
@@ -333,6 +345,19 @@ public class GiangVienController {
         yeuCauMuonPhongRepository.save(yeuCau);
         
         return ResponseEntity.ok(new MessageResponse("Đã gửi yêu cầu mượn phòng thành công"));
+    }
+    
+    private int getTietFromTime(Date time) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(time);
+
+        int hour = cal.get(Calendar.HOUR_OF_DAY);
+        int minute = cal.get(Calendar.MINUTE);
+
+        int totalMinutes = (hour * 60 + minute) - (7 * 60); // số phút sau 7h sáng
+
+        int tiet = totalMinutes / 60 + 1; // mỗi tiết dài 60 phút
+        return tiet;
     }
     
     // 6. Trả phòng học
