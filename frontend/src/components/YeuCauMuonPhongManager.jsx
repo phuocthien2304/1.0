@@ -1,14 +1,35 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Table, Button, Form, Modal, Badge, Tabs, Tab, ProgressBar } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Table,
+  Button,
+  Form,
+  Modal,
+  Badge,
+  Tabs,
+  Tab,
+  ProgressBar,
+} from "react-bootstrap";
 import axios from "axios";
 import authHeader from "../services/auth-header";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { 
-  faCheck, faTimes, faEye, faSearch, faChartBar,
-  faFilter, faClipboardCheck, faClipboardList, faClipboardQuestion, faKey
+import {
+  faCheck,
+  faTimes,
+  faEye,
+  faSearch,
+  faChartBar,
+  faFilter,
+  faClipboardCheck,
+  faClipboardList,
+  faClipboardQuestion,
+  faKey,
 } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment";
-import 'moment/locale/vi';
+import "moment/locale/vi";
 import { toast } from "react-toastify";
 
 const API_URL = "http://localhost:8080/api/quanly";
@@ -37,7 +58,9 @@ const YeuCauMuonPhongManager = () => {
   const fetchYeuCauList = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/yeucau`, { headers: authHeader() });
+      const response = await axios.get(`${API_URL}/yeucau`, {
+        headers: authHeader(),
+      });
       setYeuCauList(response.data);
       setLoading(false);
     } catch (error) {
@@ -50,13 +73,15 @@ const YeuCauMuonPhongManager = () => {
   // Hàm kiểm tra các yêu cầu đã được cho mượn
   const checkDaChoMuon = async () => {
     try {
-      const response = await axios.get(`${API_URL}/yeucau/dachophep`, { headers: authHeader() });
+      const response = await axios.get(`${API_URL}/yeucau/dachophep`, {
+        headers: authHeader(),
+      });
       const daMuonData = {};
-      
-      response.data.forEach(maYeuCau => {
+
+      response.data.forEach((maYeuCau) => {
         daMuonData[maYeuCau] = true;
       });
-      
+
       setDaMuonList(daMuonData);
     } catch (error) {
       console.error("Lỗi khi kiểm tra yêu cầu đã cho mượn:", error);
@@ -66,27 +91,28 @@ const YeuCauMuonPhongManager = () => {
   // Lọc yêu cầu theo các tab
   const getFilteredYeuCau = () => {
     let filtered = [...yeuCauList];
-    
+
     // Lọc theo tab đang chọn
     if (activeTab === "pending") {
-      filtered = filtered.filter(yc => yc.trangThai === "DANGXULY");
+      filtered = filtered.filter((yc) => yc.trangThai === "DANGXULY");
     } else if (activeTab === "approved") {
-      filtered = filtered.filter(yc => yc.trangThai === "DADUYET");
+      filtered = filtered.filter((yc) => yc.trangThai === "DADUYET");
     } else if (activeTab === "rejected") {
-      filtered = filtered.filter(yc => yc.trangThai === "KHONGDUOCDUYET");
+      filtered = filtered.filter((yc) => yc.trangThai === "KHONGDUOCDUYET");
     }
-    
+
     // Lọc theo từ khóa tìm kiếm
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(yc => 
-        (yc.nguoiMuon && yc.nguoiMuon.toLowerCase().includes(searchLower)) ||
-        (yc.phong && yc.phong.toLowerCase().includes(searchLower)) ||
-        (yc.viTri && yc.viTri.toLowerCase().includes(searchLower)) ||
-        (yc.mucDich && yc.mucDich.toLowerCase().includes(searchLower))
+      filtered = filtered.filter(
+        (yc) =>
+          (yc.nguoiMuon && yc.nguoiMuon.toLowerCase().includes(searchLower)) ||
+          (yc.phong && yc.phong.toLowerCase().includes(searchLower)) ||
+          (yc.viTri && yc.viTri.toLowerCase().includes(searchLower)) ||
+          (yc.mucDich && yc.mucDich.toLowerCase().includes(searchLower))
       );
     }
-    
+
     return filtered;
   };
 
@@ -94,10 +120,9 @@ const YeuCauMuonPhongManager = () => {
   const handleViewDetail = async (maYeuCau) => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${API_URL}/yeucau/${maYeuCau}`,
-        { headers: authHeader() }
-      );
+      const response = await axios.get(`${API_URL}/yeucau/${maYeuCau}`, {
+        headers: authHeader(),
+      });
       setSelectedYeuCau(response.data);
       setShowDetailModal(true);
       setLoading(false);
@@ -125,13 +150,15 @@ const YeuCauMuonPhongManager = () => {
       );
       toast.success("Đã duyệt yêu cầu thành công!");
       fetchYeuCauList();
-      
+
       // Cập nhật thông tin chi tiết nếu đang xem
       if (selectedYeuCau && selectedYeuCau.maYeuCau === maYeuCau) {
         handleViewDetail(maYeuCau);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi duyệt yêu cầu.");
+      toast.error(
+        error.response?.data?.message || "Đã có lỗi xảy ra khi duyệt yêu cầu."
+      );
     }
   };
 
@@ -152,7 +179,9 @@ const YeuCauMuonPhongManager = () => {
       toast.success("Đã từ chối yêu cầu thành công!");
       fetchYeuCauList();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi từ chối yêu cầu.");
+      toast.error(
+        error.response?.data?.message || "Đã có lỗi xảy ra khi từ chối yêu cầu."
+      );
     }
   };
 
@@ -165,21 +194,23 @@ const YeuCauMuonPhongManager = () => {
         { headers: authHeader() }
       );
       toast.success("Đã ghi nhận việc cho mượn phòng thành công!");
-      
+
       // Cập nhật danh sách yêu cầu đã cho mượn
-      setDaMuonList(prev => ({
+      setDaMuonList((prev) => ({
         ...prev,
-        [maYeuCau]: true
+        [maYeuCau]: true,
       }));
-      
+
       fetchYeuCauList();
-      
+
       // Cập nhật thông tin chi tiết nếu đang xem
       if (selectedYeuCau && selectedYeuCau.maYeuCau === maYeuCau) {
         handleViewDetail(maYeuCau);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi cho mượn phòng.");
+      toast.error(
+        error.response?.data?.message || "Đã có lỗi xảy ra khi cho mượn phòng."
+      );
     }
   };
 
@@ -205,14 +236,16 @@ const YeuCauMuonPhongManager = () => {
 
   // Lấy số lượng yêu cầu theo trạng thái
   const getCountByStatus = (status) => {
-    return yeuCauList.filter(yc => yc.trangThai === status).length;
+    return yeuCauList.filter((yc) => yc.trangThai === status).length;
   };
 
   // Lấy thống kê về việc trả phòng
   const fetchReturnStats = async () => {
     setStatsLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/yeucau/thongke-tra-phong`, { headers: authHeader() });
+      const response = await axios.get(`${API_URL}/yeucau/thongke-tra-phong`, {
+        headers: authHeader(),
+      });
       setReturnStats(response.data);
       setStatsLoading(false);
     } catch (error) {
@@ -228,40 +261,50 @@ const YeuCauMuonPhongManager = () => {
   };
 
   return (
-    <Container fluid>
+    <Container>
       <Card className="mb-4">
         <Card.Header className="bg-white pb-0">
           <div className="d-flex justify-content-between align-items-center mb-2">
             <h5 className="mb-0">Quản lý yêu cầu mượn phòng</h5>
-            <Button variant="info" onClick={handleShowStatsModal} id="yeucau-stats-btn">
+            <Button
+              variant="outline-light"
+              onClick={handleShowStatsModal}
+              id="yeucau-stats-btn"
+            >
               <FontAwesomeIcon icon={faChartBar} /> Báo cáo thống kê
             </Button>
           </div>
           <Tabs
             activeKey={activeTab}
             onSelect={(key) => setActiveTab(key)}
-            className="mb-0"
+            className="ms-0 mb-0"
           >
-            <Tab 
-              eventKey="all" 
+            <Tab
+              eventKey="all"
               title={
                 <span>
-                  <FontAwesomeIcon icon={faClipboardList} className="me-1" />
+                  <FontAwesomeIcon
+                    icon={faClipboardList}
+                    className="md-3 me-1"
+                  />
                   Tất cả ({yeuCauList.length})
                 </span>
               }
             />
-            <Tab 
-              eventKey="pending" 
+            <Tab
+              eventKey="pending"
               title={
                 <span>
-                  <FontAwesomeIcon icon={faClipboardQuestion} className="me-1" />
+                  <FontAwesomeIcon
+                    icon={faClipboardQuestion}
+                    className="me-1"
+                  />
                   Đang xử lý ({getCountByStatus("DANGXULY")})
                 </span>
               }
             />
-            <Tab 
-              eventKey="approved" 
+            <Tab
+              eventKey="approved"
               title={
                 <span>
                   <FontAwesomeIcon icon={faClipboardCheck} className="me-1" />
@@ -269,8 +312,8 @@ const YeuCauMuonPhongManager = () => {
                 </span>
               }
             />
-            <Tab 
-              eventKey="rejected" 
+            <Tab
+              eventKey="rejected"
               title={
                 <span>
                   <FontAwesomeIcon icon={faTimes} className="me-1" />
@@ -298,7 +341,7 @@ const YeuCauMuonPhongManager = () => {
               </Form.Group>
             </Col>
           </Row>
-          
+
           <div className="table-responsive">
             <Table striped hover className="align-middle">
               <thead>
@@ -317,7 +360,10 @@ const YeuCauMuonPhongManager = () => {
                 {loading ? (
                   <tr>
                     <td colSpan="8" className="text-center">
-                      <div className="spinner-border text-primary" role="status">
+                      <div
+                        className="spinner-border text-primary"
+                        role="status"
+                      >
                         <span className="visually-hidden">Loading...</span>
                       </div>
                     </td>
@@ -346,29 +392,31 @@ const YeuCauMuonPhongManager = () => {
                       </td> */}
                       <td>{renderTrangThai(yeuCau.trangThai)}</td>
                       <td>
-                        <Button 
-                          variant="outline-info" 
-                          size="sm" 
-                          className="me-1" 
+                        <Button
+                          variant="outline-info"
+                          size="sm"
+                          className="me-1"
                           title="Xem chi tiết"
                           onClick={() => handleViewDetail(yeuCau.maYeuCau)}
                         >
                           <FontAwesomeIcon icon={faEye} />
                         </Button>
-                        
+
                         {yeuCau.trangThai === "DANGXULY" && (
                           <>
-                            <Button 
-                              variant="outline-success" 
-                              size="sm" 
+                            <Button
+                              variant="outline-success"
+                              size="sm"
                               className="me-1"
                               title="Duyệt yêu cầu"
-                              onClick={() => handleApproveRequest(yeuCau.maYeuCau)}
+                              onClick={() =>
+                                handleApproveRequest(yeuCau.maYeuCau)
+                              }
                             >
                               <FontAwesomeIcon icon={faCheck} />
                             </Button>
-                            <Button 
-                              variant="outline-danger" 
+                            <Button
+                              variant="outline-danger"
                               size="sm"
                               title="Từ chối yêu cầu"
                               onClick={() => handleShowRejectModal(yeuCau)}
@@ -378,18 +426,19 @@ const YeuCauMuonPhongManager = () => {
                           </>
                         )}
 
-                        {yeuCau.trangThai === "DADUYET" && !daMuonList[yeuCau.maYeuCau] && (
-                          <>
-                            <Button 
-                              variant="outline-primary" 
-                              size="sm"
-                              title="Cho mượn phòng"
-                              onClick={() => handleChoMuon(yeuCau.maYeuCau)}
-                            >
-                              <FontAwesomeIcon icon={faKey} />
-                            </Button>
-                          </>
-                        )}
+                        {yeuCau.trangThai === "DADUYET" &&
+                          !daMuonList[yeuCau.maYeuCau] && (
+                            <>
+                              <Button
+                                variant="outline-primary"
+                                size="sm"
+                                title="Cho mượn phòng"
+                                onClick={() => handleChoMuon(yeuCau.maYeuCau)}
+                              >
+                                <FontAwesomeIcon icon={faKey} />
+                              </Button>
+                            </>
+                          )}
                       </td>
                     </tr>
                   ))
@@ -401,9 +450,15 @@ const YeuCauMuonPhongManager = () => {
       </Card>
 
       {/* Modal Xem chi tiết yêu cầu */}
-      <Modal show={showDetailModal} onHide={() => setShowDetailModal(false)} size="lg">
+      <Modal
+        show={showDetailModal}
+        onHide={() => setShowDetailModal(false)}
+        size="lg"
+      >
         <Modal.Header closeButton>
-          <Modal.Title>Chi tiết yêu cầu mượn phòng #{selectedYeuCau?.maYeuCau}</Modal.Title>
+          <Modal.Title>
+            Chi tiết yêu cầu mượn phòng #{selectedYeuCau?.maYeuCau}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedYeuCau && (
@@ -411,77 +466,103 @@ const YeuCauMuonPhongManager = () => {
               <Row className="mb-4">
                 <Col md={6}>
                   <h6 className="text-muted mb-2">Thông tin người mượn</h6>
-                  <p className="mb-1"><strong>Họ tên:</strong> {selectedYeuCau.nguoiMuon}</p>
-                  <p className="mb-1"><strong>ID:</strong> {selectedYeuCau.idNguoiMuon}</p>
+                  <p className="mb-1">
+                    <strong>Họ tên:</strong> {selectedYeuCau.nguoiMuon}
+                  </p>
+                  <p className="mb-1">
+                    <strong>ID:</strong> {selectedYeuCau.idNguoiMuon}
+                  </p>
                 </Col>
                 <Col md={6}>
                   <h6 className="text-muted mb-2">Thông tin phòng</h6>
-                  <p className="mb-1"><strong>Mã phòng:</strong> {selectedYeuCau.maPhong}</p>
-                  <p className="mb-1"><strong>Vị trí:</strong> {selectedYeuCau.viTri}</p>
-                  <p className="mb-1"><strong>Loại phòng:</strong> {selectedYeuCau.loaiPhong}</p>
+                  <p className="mb-1">
+                    <strong>Mã phòng:</strong> {selectedYeuCau.maPhong}
+                  </p>
+                  <p className="mb-1">
+                    <strong>Vị trí:</strong> {selectedYeuCau.viTri}
+                  </p>
+                  <p className="mb-1">
+                    <strong>Loại phòng:</strong> {selectedYeuCau.loaiPhong}
+                  </p>
                 </Col>
               </Row>
-              
+
               <Row className="mb-4">
                 <Col md={6}>
                   <h6 className="text-muted mb-2">Thời gian</h6>
-                  <p className="mb-1"><strong>Mượn:</strong> {formatDateTime(selectedYeuCau.thoiGianMuon)}</p>
-                  <p className="mb-1"><strong>Trả:</strong> {formatDateTime(selectedYeuCau.thoiGianTra)}</p>
+                  <p className="mb-1">
+                    <strong>Mượn:</strong>{" "}
+                    {formatDateTime(selectedYeuCau.thoiGianMuon)}
+                  </p>
+                  <p className="mb-1">
+                    <strong>Trả:</strong>{" "}
+                    {formatDateTime(selectedYeuCau.thoiGianTra)}
+                  </p>
                 </Col>
                 <Col md={6}>
                   <h6 className="text-muted mb-2">Trạng thái</h6>
                   <p className="mb-1">
-                    <strong>Trạng thái:</strong> {renderTrangThai(selectedYeuCau.trangThai)}
+                    <strong>Trạng thái:</strong>{" "}
+                    {renderTrangThai(selectedYeuCau.trangThai)}
                   </p>
                   {selectedYeuCau.nguoiDuyet && (
-                    <p className="mb-1"><strong>Người duyệt:</strong> {selectedYeuCau.nguoiDuyet}</p>
+                    <p className="mb-1">
+                      <strong>Người duyệt:</strong> {selectedYeuCau.nguoiDuyet}
+                    </p>
                   )}
                 </Col>
               </Row>
-              
+
               <div className="mb-3">
                 <h6 className="text-muted mb-2">Mục đích sử dụng</h6>
                 <p>{selectedYeuCau.mucDich}</p>
               </div>
-              
+
               {selectedYeuCau.lyDo && (
                 <div className="mb-3">
                   <h6 className="text-muted mb-2">Lý do từ chối</h6>
                   <p className="text-danger">{selectedYeuCau.lyDo}</p>
                 </div>
               )}
-              
+
               {selectedYeuCau.trangThai === "DANGXULY" && (
                 <div className="d-flex mt-4">
-                  <Button 
-                    variant="success" 
+                  <Button
+                    variant="success"
                     className="me-2"
-                    onClick={() => handleApproveRequest(selectedYeuCau.maYeuCau)}
+                    onClick={() =>
+                      handleApproveRequest(selectedYeuCau.maYeuCau)
+                    }
                   >
-                    <FontAwesomeIcon icon={faCheck} className="me-1" /> Duyệt yêu cầu
+                    <FontAwesomeIcon icon={faCheck} className="me-1" /> Duyệt
+                    yêu cầu
                   </Button>
-                  <Button 
+                  <Button
                     variant="danger"
                     onClick={() => {
                       setShowDetailModal(false);
                       handleShowRejectModal(selectedYeuCau);
                     }}
                   >
-                    <FontAwesomeIcon icon={faTimes} className="me-1" /> Từ chối yêu cầu
+                    <FontAwesomeIcon icon={faTimes} className="me-1" /> Từ chối
+                    yêu cầu
                   </Button>
                 </div>
               )}
 
-              {selectedYeuCau && selectedYeuCau.trangThai === "DADUYET" && !daMuonList[selectedYeuCau.maYeuCau] && (
-                <div className="d-flex mt-4">
-                  <Button 
-                    variant="primary" 
-                    onClick={() => handleChoMuon(selectedYeuCau.maYeuCau)}
-                  >
-                    <FontAwesomeIcon icon={faKey} className="me-1" /> Cho mượn phòng
-                  </Button>
-                </div>
-              )}
+              {selectedYeuCau &&
+                selectedYeuCau.trangThai === "DADUYET" &&
+                !daMuonList[selectedYeuCau.maYeuCau] && (
+                  <div className="d-flex mt-4">
+                    <Button
+                      variant="primary"
+                      onClick={() => handleChoMuon(selectedYeuCau.maYeuCau)}
+                    >
+                      <FontAwesomeIcon icon={faKey} className="me-1" /> Cho mượn
+                      phòng
+                    </Button>
+                  </div>
+                )}
             </>
           )}
         </Modal.Body>
@@ -498,9 +579,15 @@ const YeuCauMuonPhongManager = () => {
           <Modal.Title>Từ chối yêu cầu mượn phòng</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Bạn sắp từ chối yêu cầu mượn phòng của <strong>{selectedYeuCau?.nguoiMuon}</strong> cho phòng <strong>{selectedYeuCau?.phong}</strong>.</p>
+          <p>
+            Bạn sắp từ chối yêu cầu mượn phòng của{" "}
+            <strong>{selectedYeuCau?.nguoiMuon}</strong> cho phòng{" "}
+            <strong>{selectedYeuCau?.phong}</strong>.
+          </p>
           <Form.Group className="mb-3">
-            <Form.Label>Lý do từ chối <span className="text-danger">*</span></Form.Label>
+            <Form.Label>
+              Lý do từ chối <span className="text-danger">*</span>
+            </Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
@@ -522,7 +609,11 @@ const YeuCauMuonPhongManager = () => {
       </Modal>
 
       {/* Modal Thống kê trả phòng */}
-      <Modal show={showStatsModal} onHide={() => setShowStatsModal(false)} size="lg">
+      <Modal
+        show={showStatsModal}
+        onHide={() => setShowStatsModal(false)}
+        size="lg"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Báo cáo thống kê trả phòng</Modal.Title>
         </Modal.Header>
@@ -540,7 +631,9 @@ const YeuCauMuonPhongManager = () => {
                 <Col md={3} className="text-center">
                   <Card className="h-100">
                     <Card.Body>
-                      <h2 className="display-4">{returnStats.generalStats.totalApprovedRequests}</h2>
+                      <h2 className="display-4">
+                        {returnStats.generalStats.totalApprovedRequests}
+                      </h2>
                       <p className="text-muted">Tổng số yêu cầu đã duyệt</p>
                     </Card.Body>
                   </Card>
@@ -548,7 +641,9 @@ const YeuCauMuonPhongManager = () => {
                 <Col md={3} className="text-center">
                   <Card className="h-100">
                     <Card.Body>
-                      <h2 className="display-4">{returnStats.generalStats.totalDueRequests}</h2>
+                      <h2 className="display-4">
+                        {returnStats.generalStats.totalDueRequests}
+                      </h2>
                       <p className="text-muted">Đã đến hạn trả</p>
                     </Card.Body>
                   </Card>
@@ -556,7 +651,9 @@ const YeuCauMuonPhongManager = () => {
                 <Col md={3} className="text-center">
                   <Card className="h-100 bg-success text-white">
                     <Card.Body>
-                      <h2 className="display-4">{returnStats.generalStats.onTimeCount}</h2>
+                      <h2 className="display-4">
+                        {returnStats.generalStats.onTimeCount}
+                      </h2>
                       <p>Trả đúng hạn</p>
                     </Card.Body>
                   </Card>
@@ -564,7 +661,9 @@ const YeuCauMuonPhongManager = () => {
                 <Col md={3} className="text-center">
                   <Card className="h-100 bg-danger text-white">
                     <Card.Body>
-                      <h2 className="display-4">{returnStats.generalStats.lateCount}</h2>
+                      <h2 className="display-4">
+                        {returnStats.generalStats.lateCount}
+                      </h2>
                       <p>Trả trễ hạn</p>
                     </Card.Body>
                   </Card>
@@ -577,19 +676,35 @@ const YeuCauMuonPhongManager = () => {
                   <Card.Body>
                     <div className="d-flex justify-content-between mb-2">
                       <div>
-                        <Badge bg="success" className="me-1">■</Badge> Đúng hạn
+                        <Badge bg="success" className="me-1">
+                          ■
+                        </Badge>{" "}
+                        Đúng hạn
                       </div>
                       <div>
-                        <strong>{returnStats.generalStats.onTimePercent}%</strong>
+                        <strong>
+                          {returnStats.generalStats.onTimePercent}%
+                        </strong>
                       </div>
                     </div>
                     <ProgressBar>
-                      <ProgressBar variant="success" now={returnStats.generalStats.onTimePercent} key={1} />
-                      <ProgressBar variant="danger" now={returnStats.generalStats.latePercent} key={2} />
+                      <ProgressBar
+                        variant="success"
+                        now={returnStats.generalStats.onTimePercent}
+                        key={1}
+                      />
+                      <ProgressBar
+                        variant="danger"
+                        now={returnStats.generalStats.latePercent}
+                        key={2}
+                      />
                     </ProgressBar>
                     <div className="d-flex justify-content-between mt-2">
                       <div>
-                        <Badge bg="danger" className="me-1">■</Badge> Trễ hạn
+                        <Badge bg="danger" className="me-1">
+                          ■
+                        </Badge>{" "}
+                        Trễ hạn
                       </div>
                       <div>
                         <strong>{returnStats.generalStats.latePercent}%</strong>
@@ -619,9 +734,12 @@ const YeuCauMuonPhongManager = () => {
                       </thead>
                       <tbody>
                         {returnStats.topLateUsers.map((user, index) => {
-                          const latePercent = user.totalRequests > 0 
-                            ? Math.round((user.lateReturns / user.totalRequests) * 100) 
-                            : 0;
+                          const latePercent =
+                            user.totalRequests > 0
+                              ? Math.round(
+                                  (user.lateReturns / user.totalRequests) * 100
+                                )
+                              : 0;
                           return (
                             <tr key={user.idNguoiDung}>
                               <td>{index + 1}</td>
@@ -631,16 +749,23 @@ const YeuCauMuonPhongManager = () => {
                                   {user.lateReturns}
                                 </Badge>
                               </td>
-                              <td className="text-center">{user.totalRequests}</td>
+                              <td className="text-center">
+                                {user.totalRequests}
+                              </td>
                               <td>
                                 <div className="d-flex align-items-center">
-                                  <div style={{ width: "50px" }}>{latePercent}%</div>
-                                  <ProgressBar 
+                                  <div style={{ width: "50px" }}>
+                                    {latePercent}%
+                                  </div>
+                                  <ProgressBar
                                     variant={
-                                      latePercent < 30 ? "success" : 
-                                      latePercent < 70 ? "warning" : "danger"
+                                      latePercent < 30
+                                        ? "success"
+                                        : latePercent < 70
+                                        ? "warning"
+                                        : "danger"
                                     }
-                                    now={latePercent} 
+                                    now={latePercent}
                                     style={{ height: "8px", width: "100%" }}
                                   />
                                 </div>
@@ -652,7 +777,9 @@ const YeuCauMuonPhongManager = () => {
                     </Table>
                   ) : (
                     <div className="text-center">
-                      <p className="text-muted">Chưa có dữ liệu về người trả trễ.</p>
+                      <p className="text-muted">
+                        Chưa có dữ liệu về người trả trễ.
+                      </p>
                     </div>
                   )}
                 </Col>
@@ -671,31 +798,43 @@ const YeuCauMuonPhongManager = () => {
                       </thead>
                       <tbody>
                         {returnStats.topLateRooms.map((room, index) => {
-                          const latePercent = room.totalRequests > 0 
-                            ? Math.round((room.lateReturns / room.totalRequests) * 100) 
-                            : 0;
+                          const latePercent =
+                            room.totalRequests > 0
+                              ? Math.round(
+                                  (room.lateReturns / room.totalRequests) * 100
+                                )
+                              : 0;
                           return (
                             <tr key={room.maPhong}>
                               <td>{index + 1}</td>
                               <td>
                                 {room.maPhong}
-                                <div className="small text-muted">{room.viTri}</div>
+                                <div className="small text-muted">
+                                  {room.viTri}
+                                </div>
                               </td>
                               <td className="text-center">
                                 <Badge bg="danger" pill>
                                   {room.lateReturns}
                                 </Badge>
                               </td>
-                              <td className="text-center">{room.totalRequests}</td>
+                              <td className="text-center">
+                                {room.totalRequests}
+                              </td>
                               <td>
                                 <div className="d-flex align-items-center">
-                                  <div style={{ width: "50px" }}>{latePercent}%</div>
-                                  <ProgressBar 
+                                  <div style={{ width: "50px" }}>
+                                    {latePercent}%
+                                  </div>
+                                  <ProgressBar
                                     variant={
-                                      latePercent < 30 ? "success" : 
-                                      latePercent < 70 ? "warning" : "danger"
+                                      latePercent < 30
+                                        ? "success"
+                                        : latePercent < 70
+                                        ? "warning"
+                                        : "danger"
                                     }
-                                    now={latePercent} 
+                                    now={latePercent}
                                     style={{ height: "8px", width: "100%" }}
                                   />
                                 </div>
@@ -715,7 +854,9 @@ const YeuCauMuonPhongManager = () => {
             </>
           ) : (
             <div className="text-center">
-              <p className="text-warning">Không thể tải thống kê. Vui lòng thử lại sau.</p>
+              <p className="text-warning">
+                Không thể tải thống kê. Vui lòng thử lại sau.
+              </p>
             </div>
           )}
         </Modal.Body>
@@ -729,4 +870,4 @@ const YeuCauMuonPhongManager = () => {
   );
 };
 
-export default YeuCauMuonPhongManager; 
+export default YeuCauMuonPhongManager;

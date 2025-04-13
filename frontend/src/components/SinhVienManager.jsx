@@ -1,11 +1,31 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Table, Button, Form, Modal, Badge, Tabs, Tab, Alert } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Table,
+  Button,
+  Form,
+  Modal,
+  Badge,
+  Tabs,
+  Tab,
+  Alert,
+} from "react-bootstrap";
 import axios from "axios";
 import authHeader from "../services/auth-header";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash, faSearch, faKey, faUsers, faSchool } from "@fortawesome/free-solid-svg-icons";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import {
+  faEdit,
+  faTrash,
+  faSearch,
+  faKey,
+  faUsers,
+  faSchool,
+} from "@fortawesome/free-solid-svg-icons";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const API_URL = "http://localhost:8080/api/quanly";
 
@@ -27,11 +47,11 @@ const SinhVienManager = ({ refreshKey }) => {
     gioiTinh: "Nam",
     maLop: "",
     userId: "",
-    password: ""
+    password: "",
   });
   const [lopFormData, setLopFormData] = useState({
     maLop: "",
-    tenLop: ""
+    tenLop: "",
   });
 
   // Lấy danh sách sinh viên khi component được render
@@ -43,7 +63,10 @@ const SinhVienManager = ({ refreshKey }) => {
   // Lấy danh sách sinh viên khi refreshKey thay đổi
   useEffect(() => {
     if (refreshKey) {
-      console.log("SinhVienManager refreshing due to refreshKey change:", refreshKey);
+      console.log(
+        "SinhVienManager refreshing due to refreshKey change:",
+        refreshKey
+      );
       fetchSinhVienList();
       fetchLopHocList();
     }
@@ -53,7 +76,9 @@ const SinhVienManager = ({ refreshKey }) => {
   const fetchSinhVienList = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/sinhvien`, { headers: authHeader() });
+      const response = await axios.get(`${API_URL}/sinhvien`, {
+        headers: authHeader(),
+      });
       setSinhVienList(response.data);
       setLoading(false);
     } catch (error) {
@@ -67,13 +92,17 @@ const SinhVienManager = ({ refreshKey }) => {
   const fetchLopHocList = async () => {
     try {
       // Kiểm tra xem user đã đăng nhập chưa
-      const user = JSON.parse(localStorage.getItem('user'));
+      const user = JSON.parse(localStorage.getItem("user"));
       if (!user || !user.token) {
-        console.log("Không có token xác thực, bỏ qua việc lấy danh sách lớp học");
+        console.log(
+          "Không có token xác thực, bỏ qua việc lấy danh sách lớp học"
+        );
         return;
       }
-      
-      const response = await axios.get(`${API_URL}/lophoc`, { headers: authHeader() });
+
+      const response = await axios.get(`${API_URL}/lophoc`, {
+        headers: authHeader(),
+      });
       setLopHocList(response.data);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách lớp học:", error);
@@ -89,7 +118,7 @@ const SinhVienManager = ({ refreshKey }) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -98,7 +127,7 @@ const SinhVienManager = ({ refreshKey }) => {
     const { name, value } = e.target;
     setLopFormData({
       ...lopFormData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -110,7 +139,7 @@ const SinhVienManager = ({ refreshKey }) => {
       setFormData({
         ...formData,
         userId: "",
-        password: ""
+        password: "",
       });
     }
   };
@@ -119,7 +148,7 @@ const SinhVienManager = ({ refreshKey }) => {
   const handleShowAddLopModal = () => {
     setLopFormData({
       maLop: "",
-      tenLop: ""
+      tenLop: "",
     });
     setShowAddLopModal(true);
   };
@@ -132,16 +161,16 @@ const SinhVienManager = ({ refreshKey }) => {
     }
 
     try {
-      const response = await axios.post(
-        `${API_URL}/lophoc`,
-        lopFormData,
-        { headers: authHeader() }
-      );
+      const response = await axios.post(`${API_URL}/lophoc`, lopFormData, {
+        headers: authHeader(),
+      });
       setShowAddLopModal(false);
       toast.success("Lớp học đã được tạo thành công!");
       fetchLopHocList();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi tạo lớp học.");
+      toast.error(
+        error.response?.data?.message || "Đã có lỗi xảy ra khi tạo lớp học."
+      );
     }
   };
 
@@ -155,7 +184,7 @@ const SinhVienManager = ({ refreshKey }) => {
       lienHe: sinhVien.lienHe || "",
       gioiTinh: sinhVien.gioiTinh,
       maLop: sinhVien.maLop || "",
-      password: "" // Password luôn trống khi sửa
+      password: "", // Password luôn trống khi sửa
     });
     setShowTaiKhoanForm(false);
     setShowEditModal(true);
@@ -170,12 +199,12 @@ const SinhVienManager = ({ refreshKey }) => {
 
     try {
       const requestData = { ...formData };
-      
+
       // Nếu mật khẩu trống, không gửi lên server
       if (!requestData.password) {
         delete requestData.password;
       }
-      
+
       // Không cần gửi userId khi cập nhật
       delete requestData.userId;
 
@@ -188,7 +217,10 @@ const SinhVienManager = ({ refreshKey }) => {
       toast.success("Cập nhật sinh viên thành công!");
       fetchSinhVienList();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi cập nhật sinh viên.");
+      toast.error(
+        error.response?.data?.message ||
+          "Đã có lỗi xảy ra khi cập nhật sinh viên."
+      );
     }
   };
 
@@ -201,15 +233,16 @@ const SinhVienManager = ({ refreshKey }) => {
   // Xóa sinh viên
   const handleDeleteSinhVien = async () => {
     try {
-      await axios.delete(
-        `${API_URL}/sinhvien/${currentSinhVien.maSV}`,
-        { headers: authHeader() }
-      );
+      await axios.delete(`${API_URL}/sinhvien/${currentSinhVien.maSV}`, {
+        headers: authHeader(),
+      });
       setShowConfirmModal(false);
       toast.success("Sinh viên đã được xóa thành công!");
       fetchSinhVienList();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi xóa sinh viên.");
+      toast.error(
+        error.response?.data?.message || "Đã có lỗi xảy ra khi xóa sinh viên."
+      );
       setShowConfirmModal(false);
     }
   };
@@ -229,24 +262,24 @@ const SinhVienManager = ({ refreshKey }) => {
   };
 
   // Lọc danh sách sinh viên theo từ khóa tìm kiếm
-  const filteredSinhVien = sinhVienList.filter(sv =>
-    (sv.maSV && sv.maSV.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (sv.hoTen && sv.hoTen.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (sv.email && sv.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (sv.tenLop && sv.tenLop.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredSinhVien = sinhVienList.filter(
+    (sv) =>
+      (sv.maSV && sv.maSV.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (sv.hoTen && sv.hoTen.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (sv.email && sv.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (sv.tenLop && sv.tenLop.toLowerCase().includes(searchTerm.toLowerCase()))
   );
-  
+
   return (
-    <Container fluid>
+    <Container>
       <Card className="mb-4">
         <Card.Header>
           <div className="d-flex justify-content-between align-items-center mb-2">
             <h5 className="mb-0">Quản lý sinh viên</h5>
-            <div className="mb-3 d-flex justify-content-end gap-2">
-              <Button variant="primary" onClick={handleShowAddLopModal}>
-                <FontAwesomeIcon icon={faSchool} /> Thêm lớp học
-              </Button>
-            </div>
+
+            <Button variant="outline-light" onClick={handleShowAddLopModal}>
+              <FontAwesomeIcon icon={faSchool} /> Thêm lớp học
+            </Button>
           </div>
         </Card.Header>
         <Card.Body>
@@ -267,7 +300,7 @@ const SinhVienManager = ({ refreshKey }) => {
               </Form.Group>
             </Col>
           </Row>
-          
+
           <div className="table-responsive">
             <Table striped hover className="align-middle">
               <thead>
@@ -285,7 +318,10 @@ const SinhVienManager = ({ refreshKey }) => {
                 {loading ? (
                   <tr>
                     <td colSpan="7" className="text-center">
-                      <div className="spinner-border text-primary" role="status">
+                      <div
+                        className="spinner-border text-primary"
+                        role="status"
+                      >
                         <span className="visually-hidden">Loading...</span>
                       </div>
                     </td>
@@ -304,12 +340,25 @@ const SinhVienManager = ({ refreshKey }) => {
                       <td>{sinhVien.email}</td>
                       <td>{sinhVien.lienHe || "N/A"}</td>
                       <td>{renderGioiTinh(sinhVien.gioiTinh)}</td>
-                      <td>{sinhVien.tenLop || <Badge bg="warning">Chưa phân lớp</Badge>}</td>
                       <td>
-                        <Button variant="outline-primary" size="sm" className="me-1" onClick={() => handleShowEditModal(sinhVien)}>
+                        {sinhVien.tenLop || (
+                          <Badge bg="warning">Chưa phân lớp</Badge>
+                        )}
+                      </td>
+                      <td>
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          className="mb-1"
+                          onClick={() => handleShowEditModal(sinhVien)}
+                        >
                           <FontAwesomeIcon icon={faEdit} />
                         </Button>
-                        <Button variant="outline-danger" size="sm" onClick={() => handleShowDeleteConfirm(sinhVien)}>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => handleShowDeleteConfirm(sinhVien)}
+                        >
                           <FontAwesomeIcon icon={faTrash} />
                         </Button>
                       </td>
@@ -323,14 +372,20 @@ const SinhVienManager = ({ refreshKey }) => {
       </Card>
 
       {/* Modal Thêm lớp học */}
-      <Modal show={showAddLopModal} onHide={() => setShowAddLopModal(false)} backdrop="static">
+      <Modal
+        show={showAddLopModal}
+        onHide={() => setShowAddLopModal(false)}
+        backdrop="static"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Tạo lớp học mới</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group className="mb-3">
-              <Form.Label>Mã lớp <span className="text-danger">*</span></Form.Label>
+              <Form.Label>
+                Mã lớp <span className="text-danger">*</span>
+              </Form.Label>
               <Form.Control
                 type="text"
                 name="maLop"
@@ -340,7 +395,9 @@ const SinhVienManager = ({ refreshKey }) => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Tên lớp <span className="text-danger">*</span></Form.Label>
+              <Form.Label>
+                Tên lớp <span className="text-danger">*</span>
+              </Form.Label>
               <Form.Control
                 type="text"
                 name="tenLop"
@@ -362,7 +419,12 @@ const SinhVienManager = ({ refreshKey }) => {
       </Modal>
 
       {/* Modal Sửa sinh viên */}
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} backdrop="static" size="lg">
+      <Modal
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
+        backdrop="static"
+        size="lg"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Sửa sinh viên {currentSinhVien?.hoTen}</Modal.Title>
         </Modal.Header>
@@ -372,11 +434,7 @@ const SinhVienManager = ({ refreshKey }) => {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Mã sinh viên</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={formData.maSV}
-                    disabled
-                  />
+                  <Form.Control type="text" value={formData.maSV} disabled />
                 </Form.Group>
               </Col>
               <Col md={6}>
@@ -388,7 +446,7 @@ const SinhVienManager = ({ refreshKey }) => {
                     onChange={handleInputChange}
                   >
                     <option value="">-- Chọn lớp --</option>
-                    {lopHocList.map(lop => (
+                    {lopHocList.map((lop) => (
                       <option key={lop.maLop} value={lop.maLop}>
                         {lop.tenLop} ({lop.maLop})
                       </option>
@@ -401,7 +459,9 @@ const SinhVienManager = ({ refreshKey }) => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Họ tên <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Họ tên <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="text"
                     name="hoTen"
@@ -413,7 +473,9 @@ const SinhVienManager = ({ refreshKey }) => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Email <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Email <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="email"
                     name="email"
@@ -439,7 +501,9 @@ const SinhVienManager = ({ refreshKey }) => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Giới tính <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Giới tính <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Select
                     name="gioiTinh"
                     value={formData.gioiTinh}
@@ -457,9 +521,15 @@ const SinhVienManager = ({ refreshKey }) => {
             <Row>
               <Col>
                 <Form.Group className="mb-3">
-                  <Button variant="link" onClick={handleToggleTaiKhoanForm} className="p-0">
+                  <Button
+                    variant="link"
+                    onClick={handleToggleTaiKhoanForm}
+                    className="p-0"
+                  >
                     <FontAwesomeIcon icon={faKey} className="me-1" />
-                    {showTaiKhoanForm ? "Ẩn cập nhật mật khẩu" : "Cập nhật mật khẩu"}
+                    {showTaiKhoanForm
+                      ? "Ẩn cập nhật mật khẩu"
+                      : "Cập nhật mật khẩu"}
                   </Button>
                 </Form.Group>
               </Col>
@@ -472,7 +542,9 @@ const SinhVienManager = ({ refreshKey }) => {
                   <Row>
                     <Col md={12}>
                       <Form.Group className="mb-3">
-                        <Form.Label>Mật khẩu mới <span className="text-danger">*</span></Form.Label>
+                        <Form.Label>
+                          Mật khẩu mới <span className="text-danger">*</span>
+                        </Form.Label>
                         <Form.Control
                           type="password"
                           name="password"
@@ -507,11 +579,20 @@ const SinhVienManager = ({ refreshKey }) => {
           <Modal.Title>Xác nhận xóa</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Bạn có chắc chắn muốn xóa sinh viên <strong>{currentSinhVien?.hoTen}</strong>?</p>
-          <p className="text-danger">Lưu ý: Hành động này không thể hoàn tác và sẽ xóa cả thông tin người dùng và tài khoản.</p>
+          <p>
+            Bạn có chắc chắn muốn xóa sinh viên{" "}
+            <strong>{currentSinhVien?.hoTen}</strong>?
+          </p>
+          <p className="text-danger">
+            Lưu ý: Hành động này không thể hoàn tác và sẽ xóa cả thông tin người
+            dùng và tài khoản.
+          </p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowConfirmModal(false)}
+          >
             Hủy
           </Button>
           <Button variant="danger" onClick={handleDeleteSinhVien}>
@@ -523,4 +604,4 @@ const SinhVienManager = ({ refreshKey }) => {
   );
 };
 
-export default SinhVienManager; 
+export default SinhVienManager;

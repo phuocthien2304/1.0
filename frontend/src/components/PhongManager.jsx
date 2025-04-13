@@ -359,21 +359,24 @@ const PhongManager = () => {
   };
 
   return (
-    <Container fluid>
+    <Container>
       <Card className="mb-4">
         <Card.Header className="d-flex justify-content-between align-items-center">
           <h5 className="mb-0">Quản lý phòng học</h5>
           <div>
             <Button
-              variant="info"
+              variant="outline-light"
               className="me-2"
+              onClick={handleShowAddModal}
+            >
+              <FontAwesomeIcon icon={faPlus} /> Thêm phòng học
+            </Button>
+            <Button
+              variant="outline-light"
               onClick={handleShowStatsModal}
               id="phong-stats-btn"
             >
               <FontAwesomeIcon icon={faChartBar} /> Báo cáo thống kê
-            </Button>
-            <Button variant="success" onClick={handleShowAddModal}>
-              <FontAwesomeIcon icon={faPlus} /> Thêm phòng học
             </Button>
           </div>
         </Card.Header>

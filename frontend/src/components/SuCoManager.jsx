@@ -1,19 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Table, Button, Badge, Form, Spinner } from 'react-bootstrap';
-import UserService from '../services/user.service';
+import React, { useState, useEffect } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Table,
+  Button,
+  Badge,
+  Form,
+  Spinner,
+} from "react-bootstrap";
+import UserService from "../services/user.service";
 
 const SuCoManager = () => {
   const [suCoList, setSuCoList] = useState([]);
   const [filteredSuCo, setFilteredSuCo] = useState([]);
-  const [selectedTrangThai, setSelectedTrangThai] = useState('TATCA');
+  const [selectedTrangThai, setSelectedTrangThai] = useState("TATCA");
   const [thongKe, setThongKe] = useState({
     tongSoSuCo: 0,
     soLuongTheoTrangThai: {
       ChuaXuLy: 0,
       DangXuLy: 0,
-      DaXuLy: 0
+      DaXuLy: 0,
     },
-    thongKeTheoPhong: []
+    thongKeTheoPhong: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -28,19 +38,21 @@ const SuCoManager = () => {
   useEffect(() => {
     // Thống kê theo phòng dựa trên filteredSuCo
     const thongKeMap = {};
-    filteredSuCo.forEach(suCo => {
-      const maPhong = suCo.phong?.maPhong || 'Không xác định';
+    filteredSuCo.forEach((suCo) => {
+      const maPhong = suCo.phong?.maPhong || "Không xác định";
       thongKeMap[maPhong] = (thongKeMap[maPhong] || 0) + 1;
     });
 
-    const thongKeTheoPhong = Object.entries(thongKeMap).map(([maPhong, count]) => ({
-      maPhong,
-      count
-    }));
+    const thongKeTheoPhong = Object.entries(thongKeMap).map(
+      ([maPhong, count]) => ({
+        maPhong,
+        count,
+      })
+    );
 
-    setThongKe(prev => ({
+    setThongKe((prev) => ({
       ...prev,
-      thongKeTheoPhong
+      thongKeTheoPhong,
     }));
   }, [filteredSuCo]);
 
@@ -57,29 +69,31 @@ const SuCoManager = () => {
         soLuongTheoTrangThai: {
           ChuaXuLy: 0,
           DangXuLy: 0,
-          DaXuLy: 0
+          DaXuLy: 0,
         },
-        thongKeTheoPhong: []
+        thongKeTheoPhong: [],
       };
 
-      suCoResponse.data.forEach(suCo => {
+      suCoResponse.data.forEach((suCo) => {
         thongKeData.soLuongTheoTrangThai[suCo.trangThai] =
           (thongKeData.soLuongTheoTrangThai[suCo.trangThai] || 0) + 1;
       });
 
       setThongKe(thongKeData);
     } catch (error) {
-      console.error('Lỗi khi tải dữ liệu:', error);
+      console.error("Lỗi khi tải dữ liệu:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const filterSuCo = () => {
-    if (selectedTrangThai === 'TATCA') {
+    if (selectedTrangThai === "TATCA") {
       setFilteredSuCo(suCoList);
     } else {
-      setFilteredSuCo(suCoList.filter(suCo => suCo.trangThai === selectedTrangThai));
+      setFilteredSuCo(
+        suCoList.filter((suCo) => suCo.trangThai === selectedTrangThai)
+      );
     }
   };
 
@@ -88,17 +102,17 @@ const SuCoManager = () => {
       await UserService.updateTrangThaiSuCo(id, newTrangThai);
       await fetchData();
     } catch (error) {
-      console.error('Lỗi khi cập nhật trạng thái:', error);
+      console.error("Lỗi khi cập nhật trạng thái:", error);
     }
   };
 
   const getTrangThaiBadge = (trangThai) => {
     const colors = {
-      'ChuaXuLy': 'warning',
-      'DangXuLy': 'primary',
-      'DaXuLy': 'success'
+      ChuaXuLy: "warning",
+      DangXuLy: "primary",
+      DaXuLy: "success",
     };
-    return <Badge bg={colors[trangThai] || 'secondary'}>{trangThai}</Badge>;
+    return <Badge bg={colors[trangThai] || "secondary"}>{trangThai}</Badge>;
   };
 
   if (loading) {
@@ -112,7 +126,7 @@ const SuCoManager = () => {
   }
 
   return (
-    <Container fluid>
+    <Container>
       <Row className="mb-4">
         <Col>
           <h2>Quản lý sự cố</h2>
@@ -123,7 +137,9 @@ const SuCoManager = () => {
         <Col md={8}>
           <Card>
             <Card.Body>
-              <Card.Title>Thống kê sự cố theo phòng (theo bộ lọc hiện tại)</Card.Title>
+              <Card.Title className="max-content">
+                Thống kê sự cố phòng (theo bộ lọc hiện tại)
+              </Card.Title>
               <Table striped bordered hover size="sm">
                 <thead>
                   <tr>
@@ -208,20 +224,24 @@ const SuCoManager = () => {
                   <td>{new Date(suCo.thoiGianBaoCao).toLocaleString()}</td>
                   <td>{getTrangThaiBadge(suCo.trangThai)}</td>
                   <td>
-                    {suCo.trangThai === 'ChuaXuLy' && (
+                    {suCo.trangThai === "ChuaXuLy" && (
                       <Button
                         variant="primary"
                         size="sm"
-                        onClick={() => handleTrangThaiChange(suCo.idSuCo, 'DangXuLy')}
+                        onClick={() =>
+                          handleTrangThaiChange(suCo.idSuCo, "DangXuLy")
+                        }
                       >
                         Tiếp nhận
                       </Button>
                     )}
-                    {suCo.trangThai === 'DangXuLy' && (
+                    {suCo.trangThai === "DangXuLy" && (
                       <Button
                         variant="success"
                         size="sm"
-                        onClick={() => handleTrangThaiChange(suCo.idSuCo, 'DaXuLy')}
+                        onClick={() =>
+                          handleTrangThaiChange(suCo.idSuCo, "DaXuLy")
+                        }
                       >
                         Hoàn thành
                       </Button>

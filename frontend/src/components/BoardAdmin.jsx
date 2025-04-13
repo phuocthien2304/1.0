@@ -1,7 +1,25 @@
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { Card, Container, Row, Col, ListGroup, Tab, Spinner, Table, ProgressBar, Badge, Button, Modal, Form, Tabs, Accordion, Alert, InputGroup } from "react-bootstrap";
+import {
+  Card,
+  Container,
+  Row,
+  Col,
+  ListGroup,
+  Tab,
+  Spinner,
+  Table,
+  ProgressBar,
+  Badge,
+  Button,
+  Modal,
+  Form,
+  Tabs,
+  Accordion,
+  Alert,
+  InputGroup,
+} from "react-bootstrap";
 import axios from "axios";
 import authHeader from "../services/auth-header";
 import TaiKhoanManager from "./TaiKhoanManager";
@@ -9,12 +27,26 @@ import PhongManager from "./PhongManager";
 import GiangVienManager from "./GiangVienManager";
 import SinhVienManager from "./SinhVienManager";
 import YeuCauMuonPhongManager from "./YeuCauMuonPhongManager";
-import SuCoManager from './SuCoManager';
+import SuCoManager from "./SuCoManager";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faReply, faFlag, faCalendarCheck, faCalendarTimes, faCheckCircle, faTimesCircle, faFilter, faSearch, faCalendarAlt, faSync } from "@fortawesome/free-solid-svg-icons";
+import {
+  faReply,
+  faFlag,
+  faCalendarCheck,
+  faCalendarTimes,
+  faCheckCircle,
+  faTimesCircle,
+  faFilter,
+  faSearch,
+  faCalendarAlt,
+  faSync,
+  faBookReader,
+} from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import UserService from "../services/user.service";
-
+import { MdPeopleAlt } from "react-icons/md";
+import { BsPersonWorkspace } from "react-icons/bs";
+import { FaCalendarCheck } from "react-icons/fa";
 const API_URL = "http://localhost:8080/api/quanly";
 
 const BoardAdmin = () => {
@@ -26,7 +58,7 @@ const BoardAdmin = () => {
   const [feedbackFilter, setFeedbackFilter] = useState("");
   const [feedbackSort, setFeedbackSort] = useState("highRating");
   const [refreshKey, setRefreshKey] = useState(0);
-  
+
   // State cho lịch sử mượn phòng
   const [lichSuMuonPhong, setLichSuMuonPhong] = useState([]);
   const [thongKeTraPhong, setThongKeTraPhong] = useState(null);
@@ -48,7 +80,9 @@ const BoardAdmin = () => {
   const fetchDashboardStats = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/dashboard/stats`, { headers: authHeader() });
+      const response = await axios.get(`${API_URL}/dashboard/stats`, {
+        headers: authHeader(),
+      });
       setDashboardStats(response.data);
       setLoading(false);
     } catch (error) {
@@ -60,7 +94,9 @@ const BoardAdmin = () => {
   const fetchRoomFeedbackStats = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/phong/feedback`, { headers: authHeader() });
+      const response = await axios.get(`${API_URL}/phong/feedback`, {
+        headers: authHeader(),
+      });
       setRoomFeedbackStats(response.data);
       setLoading(false);
     } catch (error) {
@@ -98,9 +134,9 @@ const BoardAdmin = () => {
   };
 
   // Lọc lịch sử mượn phòng
-  const filteredLichSu = lichSuMuonPhong.filter(ls => {
+  const filteredLichSu = lichSuMuonPhong.filter((ls) => {
     if (!searchTerm) return true;
-    
+
     const term = searchTerm.toLowerCase();
     return (
       (ls.maPhong && ls.maPhong.toLowerCase().includes(term)) ||
@@ -113,8 +149,12 @@ const BoardAdmin = () => {
   // Xử lý lọc theo ngày
   const handleFilterDates = () => {
     // Chuyển đổi Date sang chuỗi ISO string rồi lọc lấy phần ngày
-    const tuNgayStr = dateFilter.tuNgay ? dateFilter.tuNgay.toISOString().split('T')[0] : '';
-    const denNgayStr = dateFilter.denNgay ? dateFilter.denNgay.toISOString().split('T')[0] : '';
+    const tuNgayStr = dateFilter.tuNgay
+      ? dateFilter.tuNgay.toISOString().split("T")[0]
+      : "";
+    const denNgayStr = dateFilter.denNgay
+      ? dateFilter.denNgay.toISOString().split("T")[0]
+      : "";
     fetchThongKeTraPhong(tuNgayStr, denNgayStr);
   };
 
@@ -126,11 +166,11 @@ const BoardAdmin = () => {
   // Lọc danh sách phản hồi
   const getFilteredFeedbacks = () => {
     if (!roomFeedbackStats || !roomFeedbackStats.recentFeedbacks) return [];
-    
+
     // Tạo danh sách tất cả phản hồi (thực tế sẽ được lấy từ API)
     // Ở đây sử dụng recentFeedbacks để demo
     let allFeedbacks = [...roomFeedbackStats.recentFeedbacks];
-    
+
     // Thêm một số phản hồi giả lập để demo tính năng lọc/sắp xếp
     allFeedbacks = [
       ...allFeedbacks,
@@ -153,20 +193,21 @@ const BoardAdmin = () => {
       //   idPhanHoi: 5
       // }
     ];
-    
+
     // Lọc theo từ khóa
     if (feedbackFilter) {
       const filter = feedbackFilter.toLowerCase();
       allFeedbacks = allFeedbacks.filter(
-        f => f.maPhong.toLowerCase().includes(filter) || 
-             f.viTri.toLowerCase().includes(filter) || 
-             f.comment.toLowerCase().includes(filter) || 
-             f.userName.toLowerCase().includes(filter)
+        (f) =>
+          f.maPhong.toLowerCase().includes(filter) ||
+          f.viTri.toLowerCase().includes(filter) ||
+          f.comment.toLowerCase().includes(filter) ||
+          f.userName.toLowerCase().includes(filter)
       );
     }
-    
+
     // Sắp xếp
-    switch(feedbackSort) {
+    switch (feedbackSort) {
       case "highRating":
         return allFeedbacks.sort((a, b) => b.rating - a.rating);
       case "lowRating":
@@ -182,15 +223,15 @@ const BoardAdmin = () => {
     // Lấy nội dung phản hồi từ người dùng
     const replyContent = prompt("Nhập nội dung phản hồi:", "");
     if (replyContent === null || replyContent.trim() === "") return;
-    
+
     setLoading(true);
     try {
       const response = await axios.put(
-        `${API_URL}/phong/feedback/${feedback.idPhanHoi}/reply`, 
-        { reply: replyContent }, 
+        `${API_URL}/phong/feedback/${feedback.idPhanHoi}/reply`,
+        { reply: replyContent },
         { headers: authHeader() }
       );
-      
+
       toast.success("Đã phản hồi thành công");
       setLoading(false);
     } catch (error) {
@@ -199,19 +240,20 @@ const BoardAdmin = () => {
       setLoading(false);
     }
   };
-  
+
   // Đánh dấu đánh giá
   const handleFlagFeedback = async (feedback) => {
-    if (!window.confirm("Bạn có chắc muốn đánh dấu phản hồi này không?")) return;
-    
+    if (!window.confirm("Bạn có chắc muốn đánh dấu phản hồi này không?"))
+      return;
+
     setLoading(true);
     try {
       const response = await axios.put(
-        `${API_URL}/phong/feedback/${feedback.idPhanHoi}/flag`, 
-        {}, 
+        `${API_URL}/phong/feedback/${feedback.idPhanHoi}/flag`,
+        {},
         { headers: authHeader() }
       );
-      
+
       toast.success("Đã đánh dấu phản hồi thành công");
       setLoading(false);
     } catch (error) {
@@ -225,8 +267,8 @@ const BoardAdmin = () => {
   const handleTaiKhoanAdded = (vaiTro) => {
     console.log("Tài khoản mới được tạo với vai trò:", vaiTro);
     // Tăng refreshKey để các component con biết cần cập nhật dữ liệu
-    setRefreshKey(prevKey => prevKey + 1);
-    
+    setRefreshKey((prevKey) => prevKey + 1);
+
     // Tự động chuyển sang tab tương ứng dựa trên vai trò tài khoản mới
     if (vaiTro === "ROLE_SV" && activeKey === "quanlytaikhoan") {
       setActiveKey("quanlysinhvien");
@@ -239,12 +281,12 @@ const BoardAdmin = () => {
   const handleTabChange = (key) => {
     setActiveKey(key);
     // Khi chuyển tab, tăng refreshKey để reload dữ liệu
-    setRefreshKey(prevKey => prevKey + 1);
+    setRefreshKey((prevKey) => prevKey + 1);
   };
 
   // Hàm refresh dữ liệu thủ công
   const handleManualRefresh = () => {
-    setRefreshKey(prevKey => prevKey + 1);
+    setRefreshKey((prevKey) => prevKey + 1);
     toast.info("Đang cập nhật dữ liệu...");
   };
 
@@ -253,47 +295,75 @@ const BoardAdmin = () => {
       <header className="mb-4">
         <div className="d-flex justify-content-between align-items-center">
           <h3>Trang Quản Lý</h3>
-          <Button 
-            variant="outline-primary" 
+          <Button
+            variant="outline-primary"
             onClick={handleManualRefresh}
             disabled={loading}
           >
-            <FontAwesomeIcon icon={faSync} className={loading ? "fa-spin me-2" : "me-2"} />
+            <FontAwesomeIcon
+              icon={faSync}
+              className={loading ? "fa-spin me-2" : "me-2"}
+            />
             Cập nhật dữ liệu
           </Button>
         </div>
       </header>
-      <Tab.Container id="admin-tabs" activeKey={activeKey} onSelect={(k) => handleTabChange(k)}>
-      <Row>
+      <Tab.Container
+        id="admin-tabs"
+        activeKey={activeKey}
+        onSelect={(k) => handleTabChange(k)}
+      >
+        <Row>
           <Col md={3} className="mb-4">
-          <Card>
-            <Card.Header className="bg-primary text-white">Chức năng quản lý</Card.Header>
-            <ListGroup variant="flush">
-                <ListGroup.Item action eventKey="dashboard">Dashboard</ListGroup.Item>
-                <ListGroup.Item action eventKey="quanlyphong">Quản lý phòng học</ListGroup.Item>
-                <ListGroup.Item action eventKey="quanlygiaovien">Quản lý giảng viên</ListGroup.Item>
-                <ListGroup.Item action eventKey="quanlysinhvien">Quản lý sinh viên</ListGroup.Item>
-                <ListGroup.Item action eventKey="quanlytaikhoan">Quản lý tài khoản</ListGroup.Item>
-                <ListGroup.Item action eventKey="duyetyeucau">Quản lý yêu cầu mượn phòng</ListGroup.Item>
-                <ListGroup.Item action eventKey="lichsumuon">Lịch sử mượn phòng</ListGroup.Item>
-                <ListGroup.Item action eventKey="baocao">Thống kê phản hồi</ListGroup.Item>
-                <ListGroup.Item action eventKey="suco">Quản lý sự cố</ListGroup.Item>
-            </ListGroup>
-          </Card>
-        </Col>
+            <Card>
+              <Card.Header className="bg-primary text-white">
+                Chức năng quản lý
+              </Card.Header>
+              <ListGroup variant="flush">
+                <ListGroup.Item action eventKey="dashboard">
+                  Dashboard
+                </ListGroup.Item>
+                <ListGroup.Item action eventKey="quanlyphong">
+                  Quản lý phòng học
+                </ListGroup.Item>
+                <ListGroup.Item action eventKey="quanlygiaovien">
+                  Quản lý giảng viên
+                </ListGroup.Item>
+                <ListGroup.Item action eventKey="quanlysinhvien">
+                  Quản lý sinh viên
+                </ListGroup.Item>
+                <ListGroup.Item action eventKey="quanlytaikhoan">
+                  Quản lý tài khoản
+                </ListGroup.Item>
+                <ListGroup.Item action eventKey="duyetyeucau">
+                  Quản lý yêu cầu mượn phòng
+                </ListGroup.Item>
+                <ListGroup.Item action eventKey="lichsumuon">
+                  Lịch sử mượn phòng
+                </ListGroup.Item>
+                <ListGroup.Item action eventKey="baocao">
+                  Thống kê phản hồi
+                </ListGroup.Item>
+                <ListGroup.Item action eventKey="suco">
+                  Quản lý sự cố
+                </ListGroup.Item>
+              </ListGroup>
+            </Card>
+          </Col>
           <Col md={9}>
             <Tab.Content>
               <Tab.Pane eventKey="dashboard">
-          <Card>
-            <Card.Body>
-              <Card.Title>Dashboard Quản Lý</Card.Title>
-              <Card.Text>
-                Chào mừng đến với trang quản lý hệ thống mượn phòng học. 
-                Tại đây bạn có thể quản lý tất cả các khía cạnh của hệ thống.
-              </Card.Text>
-              <hr />
-              <h5>Thống kê hệ thống</h5>
-                    
+                <Card>
+                  <Card.Body>
+                    <Card.Title>Dashboard Quản Lý</Card.Title>
+                    <Card.Text>
+                      Chào mừng đến với trang quản lý hệ thống mượn phòng học.
+                      Tại đây bạn có thể quản lý tất cả các khía cạnh của hệ
+                      thống.
+                    </Card.Text>
+                    <hr />
+                    <h5>Thống kê hệ thống</h5>
+
                     {loading ? (
                       <div className="text-center py-4">
                         <Spinner animation="border" role="status">
@@ -301,39 +371,58 @@ const BoardAdmin = () => {
                         </Spinner>
                       </div>
                     ) : dashboardStats ? (
-              <Row>
-                <Col sm={6} md={3} className="mb-3">
-                  <Card className="text-center bg-info text-white">
-                    <Card.Body>
-                              <h3>{dashboardStats.totalRooms}</h3>
-                      <div>Phòng học</div>
-                    </Card.Body>
-                  </Card>
-                </Col>
-                <Col sm={6} md={3} className="mb-3">
-                  <Card className="text-center bg-success text-white">
-                    <Card.Body>
-                              <h3>{dashboardStats.totalLecturers}</h3>
-                      <div>Giảng viên</div>
-                    </Card.Body>
-                  </Card>
-                </Col>
-                <Col sm={6} md={3} className="mb-3">
-                  <Card className="text-center bg-warning text-white">
-                    <Card.Body>
-                              <h3>{dashboardStats.totalStudents}</h3>
-                      <div>Sinh viên</div>
-                    </Card.Body>
-                  </Card>
-                </Col>
-                <Col sm={6} md={3} className="mb-3">
-                  <Card className="text-center bg-danger text-white">
-                    <Card.Body>
-                              <h3>{dashboardStats.roomStatusCounts.DANGSUDUNG || 0}</h3>
-                      <div>Đang mượn</div>
-                    </Card.Body>
-                  </Card>
-                </Col>
+                      <Row>
+                        <Col sm={6} md={3} className="mb-3">
+                          <Card className="text-start p-1">
+                            <Card.Body>
+                              <h3>
+                                {dashboardStats.totalRooms}
+                                <FontAwesomeIcon
+                                  icon={faBookReader}
+                                  className="ms-5"
+                                />
+                              </h3>
+
+                              <div>Phòng học</div>
+                            </Card.Body>
+                          </Card>
+                        </Col>
+                        <Col sm={6} md={3} className="mb-3">
+                          <Card className="text-start p-1  ">
+                            <Card.Body>
+                              <h3 className="text-success">
+                                {dashboardStats.totalLecturers}
+                                <BsPersonWorkspace className="ms-5 mb-1" />
+                              </h3>
+
+                              <div>Giảng viên</div>
+                            </Card.Body>
+                          </Card>
+                        </Col>
+                        <Col sm={6} md={3} className="mb-3">
+                          <Card className="text-start p-1">
+                            <Card.Body>
+                              <h3 className="text-warning">
+                                {dashboardStats.totalStudents}
+                                <MdPeopleAlt className="ms-5" />
+                              </h3>
+
+                              <div>Sinh viên</div>
+                            </Card.Body>
+                          </Card>
+                        </Col>
+                        <Col sm={6} md={3} className="mb-3">
+                          <Card className="text-start p-1 ">
+                            <Card.Body>
+                              <h3 className="text-danger">
+                                {dashboardStats.roomStatusCounts.DANGSUDUNG ||
+                                  0}
+                                <FaCalendarCheck className="ms-5" />
+                              </h3>
+                              <div>Đang mượn</div>
+                            </Card.Body>
+                          </Card>
+                        </Col>
                         <Col sm={6} md={6} className="mb-3">
                           <Card>
                             <Card.Body>
@@ -342,15 +431,30 @@ const BoardAdmin = () => {
                                 <div>
                                   <div className="d-flex justify-content-between mb-2">
                                     <div>Trống:</div>
-                                    <div><strong>{dashboardStats.roomStatusCounts.TRONG || 0}</strong></div>
+                                    <div>
+                                      <strong>
+                                        {dashboardStats.roomStatusCounts
+                                          .TRONG || 0}
+                                      </strong>
+                                    </div>
                                   </div>
                                   <div className="d-flex justify-content-between mb-2">
                                     <div>Đang sử dụng:</div>
-                                    <div><strong>{dashboardStats.roomStatusCounts.DANGSUDUNG || 0}</strong></div>
+                                    <div>
+                                      <strong>
+                                        {dashboardStats.roomStatusCounts
+                                          .DANGSUDUNG || 0}
+                                      </strong>
+                                    </div>
                                   </div>
                                   <div className="d-flex justify-content-between mb-2">
                                     <div>Đang bảo trì:</div>
-                                    <div><strong>{dashboardStats.roomStatusCounts.BAOTRI || 0}</strong></div>
+                                    <div>
+                                      <strong>
+                                        {dashboardStats.roomStatusCounts
+                                          .BAOTRI || 0}
+                                      </strong>
+                                    </div>
                                   </div>
                                 </div>
                               )}
@@ -363,30 +467,45 @@ const BoardAdmin = () => {
                               <h5 className="mb-3">Yêu cầu mượn phòng</h5>
                               <div className="d-flex justify-content-between mb-2">
                                 <div>Đang chờ duyệt:</div>
-                                <div><strong>{dashboardStats.pendingBookings}</strong></div>
+                                <div>
+                                  <strong>
+                                    {dashboardStats.pendingBookings}
+                                  </strong>
+                                </div>
                               </div>
                               <div className="d-flex justify-content-between mb-2">
                                 <div>Đang sử dụng:</div>
-                                <div><strong>{dashboardStats.activeBookings}</strong></div>
+                                <div>
+                                  <strong>
+                                    {dashboardStats.activeBookings}
+                                  </strong>
+                                </div>
                               </div>
                               <div className="d-flex justify-content-between mb-2">
                                 <div>Tổng người dùng:</div>
-                                <div><strong>{dashboardStats.totalUsers}</strong></div>
+                                <div>
+                                  <strong>{dashboardStats.totalUsers}</strong>
+                                </div>
                               </div>
                             </Card.Body>
                           </Card>
                         </Col>
-              </Row>
+                      </Row>
                     ) : (
                       <div className="text-center">
-                        <p className="text-warning">Không thể tải thống kê. Vui lòng thử lại sau.</p>
+                        <p className="text-warning">
+                          Không thể tải thống kê. Vui lòng thử lại sau.
+                        </p>
                       </div>
                     )}
                   </Card.Body>
                 </Card>
               </Tab.Pane>
               <Tab.Pane eventKey="quanlytaikhoan">
-                <TaiKhoanManager onTaiKhoanAdded={handleTaiKhoanAdded} refreshKey={refreshKey} />
+                <TaiKhoanManager
+                  onTaiKhoanAdded={handleTaiKhoanAdded}
+                  refreshKey={refreshKey}
+                />
               </Tab.Pane>
               <Tab.Pane eventKey="quanlyphong">
                 <PhongManager refreshKey={refreshKey} />
@@ -404,8 +523,10 @@ const BoardAdmin = () => {
                 <Card>
                   <Card.Body>
                     <Card.Title>Thống kê Phản Hồi</Card.Title>
-                    <p className="mb-4">Xem đánh giá và phản hồi của người dùng về phòng học</p>
-                    
+                    <p className="mb-4">
+                      Xem đánh giá và phản hồi của người dùng về phòng học
+                    </p>
+
                     {loading ? (
                       <div className="text-center py-4">
                         <Spinner animation="border" role="status">
@@ -418,7 +539,10 @@ const BoardAdmin = () => {
                           <Col sm={6} md={4} className="mb-3">
                             <Card className="text-center bg-info text-white">
                               <Card.Body>
-                                <h3>{roomFeedbackStats.generalStats.averageRating}/5</h3>
+                                <h3>
+                                  {roomFeedbackStats.generalStats.averageRating}
+                                  /5
+                                </h3>
                                 <div>Đánh giá trung bình</div>
                               </Card.Body>
                             </Card>
@@ -426,7 +550,12 @@ const BoardAdmin = () => {
                           <Col sm={6} md={4} className="mb-3">
                             <Card className="text-center bg-success text-white">
                               <Card.Body>
-                                <h3>{roomFeedbackStats.generalStats.totalFeedbackCount}</h3>
+                                <h3>
+                                  {
+                                    roomFeedbackStats.generalStats
+                                      .totalFeedbackCount
+                                  }
+                                </h3>
                                 <div>Tổng số phản hồi</div>
                               </Card.Body>
                             </Card>
@@ -434,7 +563,13 @@ const BoardAdmin = () => {
                           <Col sm={6} md={4} className="mb-3">
                             <Card className="text-center bg-warning text-white">
                               <Card.Body>
-                                <h3>{roomFeedbackStats.generalStats.positivePercentage}%</h3>
+                                <h3>
+                                  {
+                                    roomFeedbackStats.generalStats
+                                      .positivePercentage
+                                  }
+                                  %
+                                </h3>
                                 <div>Tỷ lệ đánh giá tích cực</div>
                               </Card.Body>
                             </Card>
@@ -453,24 +588,28 @@ const BoardAdmin = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {roomFeedbackStats.topRatedRooms.map((room, index) => (
-                              <tr key={room.maPhong}>
-                                <td>{index + 1}</td>
-                                <td>{room.maPhong}</td>
-                                <td>{room.viTri}</td>
-                                <td>
-                                  <div className="d-flex align-items-center">
-                                    <strong className="me-2">{room.rating}</strong>
-                                    <ProgressBar 
-                                      variant="success" 
-                                      now={room.rating * 20} 
-                                      style={{ height: "8px", width: "100%" }}
-                                    />
-                                  </div>
-                                </td>
-                                <td>{room.feedbackCount}</td>
-                              </tr>
-                            ))}
+                            {roomFeedbackStats.topRatedRooms.map(
+                              (room, index) => (
+                                <tr key={room.maPhong}>
+                                  <td>{index + 1}</td>
+                                  <td>{room.maPhong}</td>
+                                  <td>{room.viTri}</td>
+                                  <td>
+                                    <div className="d-flex align-items-center">
+                                      <strong className="me-2">
+                                        {room.rating}
+                                      </strong>
+                                      <ProgressBar
+                                        variant="success"
+                                        now={room.rating * 20}
+                                        style={{ height: "8px", width: "100%" }}
+                                      />
+                                    </div>
+                                  </td>
+                                  <td>{room.feedbackCount}</td>
+                                </tr>
+                              )
+                            )}
                           </tbody>
                         </Table>
 
@@ -486,53 +625,88 @@ const BoardAdmin = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {roomFeedbackStats.lowRatedRooms.map((room, index) => (
-                              <tr key={room.maPhong}>
-                                <td>{index + 1}</td>
-                                <td>{room.maPhong}</td>
-                                <td>{room.viTri}</td>
-                                <td>
-                                  <div className="d-flex align-items-center">
-                                    <strong className="me-2">{room.rating}</strong>
-                                    <ProgressBar 
-                                      variant={room.rating < 3 ? "danger" : "warning"} 
-                                      now={room.rating * 20} 
-                                      style={{ height: "8px", width: "100%" }}
-                                    />
-                                  </div>
-                                </td>
-                                <td>{room.feedbackCount}</td>
-                              </tr>
-                            ))}
+                            {roomFeedbackStats.lowRatedRooms.map(
+                              (room, index) => (
+                                <tr key={room.maPhong}>
+                                  <td>{index + 1}</td>
+                                  <td>{room.maPhong}</td>
+                                  <td>{room.viTri}</td>
+                                  <td>
+                                    <div className="d-flex align-items-center">
+                                      <strong className="me-2">
+                                        {room.rating}
+                                      </strong>
+                                      <ProgressBar
+                                        variant={
+                                          room.rating < 3 ? "danger" : "warning"
+                                        }
+                                        now={room.rating * 20}
+                                        style={{ height: "8px", width: "100%" }}
+                                      />
+                                    </div>
+                                  </td>
+                                  <td>{room.feedbackCount}</td>
+                                </tr>
+                              )
+                            )}
                           </tbody>
                         </Table>
 
                         <h5 className="mb-3">Phản hồi gần đây</h5>
                         <div className="list-group mb-3">
-                          {roomFeedbackStats.recentFeedbacks.map((feedback, index) => (
-                            <div className="list-group-item" key={feedback.idPhanHoi || `feedback-${index}-${feedback.maPhong}`}>
-                              <div className="d-flex justify-content-between align-items-center mb-1">
-                                <h6 className="mb-0">
-                                  <strong>{feedback.maPhong}</strong> ({feedback.viTri})
-                                  <Badge bg={feedback.rating >= 4 ? "success" : feedback.rating >= 3 ? "warning" : "danger"} className="ms-2">
-                                    {feedback.rating}
-                                  </Badge>
-                                </h6>
-                                <small className="text-muted">{feedback.daysAgo} ngày trước</small>
+                          {roomFeedbackStats.recentFeedbacks.map(
+                            (feedback, index) => (
+                              <div
+                                className="list-group-item"
+                                key={
+                                  feedback.idPhanHoi ||
+                                  `feedback-${index}-${feedback.maPhong}`
+                                }
+                              >
+                                <div className="d-flex justify-content-between align-items-center mb-1">
+                                  <h6 className="mb-0">
+                                    <strong>{feedback.maPhong}</strong> (
+                                    {feedback.viTri})
+                                    <Badge
+                                      bg={
+                                        feedback.rating >= 4
+                                          ? "success"
+                                          : feedback.rating >= 3
+                                          ? "warning"
+                                          : "danger"
+                                      }
+                                      className="ms-2"
+                                    >
+                                      {feedback.rating}
+                                    </Badge>
+                                  </h6>
+                                  <small className="text-muted">
+                                    {feedback.daysAgo} ngày trước
+                                  </small>
+                                </div>
+                                <p className="mb-1">{feedback.comment}</p>
+                                <small className="text-muted">
+                                  Người phản hồi: {feedback.userName}
+                                </small>
                               </div>
-                              <p className="mb-1">{feedback.comment}</p>
-                              <small className="text-muted">Người phản hồi: {feedback.userName}</small>
-                            </div>
-                          ))}
+                            )
+                          )}
                         </div>
 
                         <div className="text-end">
-                          <Button variant="primary" onClick={handleShowAllFeedbacks}>Xem tất cả phản hồi</Button>
+                          <Button
+                            variant="primary"
+                            onClick={handleShowAllFeedbacks}
+                          >
+                            Xem tất cả phản hồi
+                          </Button>
                         </div>
                       </>
                     ) : (
                       <div className="text-center">
-                        <p className="text-warning">Không thể tải thống kê. Vui lòng thử lại sau.</p>
+                        <p className="text-warning">
+                          Không thể tải thống kê. Vui lòng thử lại sau.
+                        </p>
                       </div>
                     )}
                   </Card.Body>
@@ -542,14 +716,15 @@ const BoardAdmin = () => {
                 <Card>
                   <Card.Header>
                     <Tabs
-                      activeKey={thongKeTabKey} 
+                      activeKey={thongKeTabKey}
                       onSelect={(k) => setThongKeTabKey(k)}
                       className="mb-3"
                     >
-                      <Tab eventKey="overall" title="Tổng quan">
-                      </Tab>
-                      <Tab eventKey="history" title="Chi tiết lịch sử mượn phòng">
-                      </Tab>
+                      <Tab eventKey="overall" title="Tổng quan"></Tab>
+                      <Tab
+                        eventKey="history"
+                        title="Chi tiết lịch sử mượn phòng"
+                      ></Tab>
                     </Tabs>
                   </Card.Header>
                   <Card.Body>
@@ -571,21 +746,41 @@ const BoardAdmin = () => {
                                   <Card className="text-center h-100">
                                     <Card.Body>
                                       <h5>Tổng số lượt mượn phòng</h5>
-                                      <h2 className="display-4">{thongKeTraPhong.tongSoLuot}</h2>
+                                      <h2 className="display-4">
+                                        {thongKeTraPhong.tongSoLuot}
+                                      </h2>
                                       <div className="d-flex justify-content-around mt-3">
                                         <div>
                                           <h5 className="text-success">
-                                            <FontAwesomeIcon icon={faCalendarCheck} className="me-2" />
+                                            <FontAwesomeIcon
+                                              icon={faCalendarCheck}
+                                              className="me-2"
+                                            />
                                             Đúng hạn: {thongKeTraPhong.dungHan}
                                           </h5>
-                                          <small>({thongKeTraPhong.phanTramDungHan.toFixed(1)}%)</small>
+                                          <small>
+                                            (
+                                            {thongKeTraPhong.phanTramDungHan.toFixed(
+                                              1
+                                            )}
+                                            %)
+                                          </small>
                                         </div>
                                         <div>
                                           <h5 className="text-danger">
-                                            <FontAwesomeIcon icon={faCalendarTimes} className="me-2" />
+                                            <FontAwesomeIcon
+                                              icon={faCalendarTimes}
+                                              className="me-2"
+                                            />
                                             Trễ hạn: {thongKeTraPhong.treHan}
                                           </h5>
-                                          <small>({thongKeTraPhong.phanTramTreHan.toFixed(1)}%)</small>
+                                          <small>
+                                            (
+                                            {thongKeTraPhong.phanTramTreHan.toFixed(
+                                              1
+                                            )}
+                                            %)
+                                          </small>
                                         </div>
                                       </div>
                                     </Card.Body>
@@ -594,27 +789,49 @@ const BoardAdmin = () => {
                                 <Col md={6}>
                                   <Card className="h-100">
                                     <Card.Body>
-                                      <h5 className="text-center mb-3">Tỷ lệ trả phòng</h5>
-                                      <div className="position-relative" style={{ height: "150px" }}>
+                                      <h5 className="text-center mb-3">
+                                        Tỷ lệ trả phòng
+                                      </h5>
+                                      <div
+                                        className="position-relative"
+                                        style={{ height: "150px" }}
+                                      >
                                         <div className="position-absolute top-50 start-50 translate-middle text-center">
-                                          <h3>{thongKeTraPhong.phanTramDungHan.toFixed(1)}%</h3>
+                                          <h3>
+                                            {thongKeTraPhong.phanTramDungHan.toFixed(
+                                              1
+                                            )}
+                                            %
+                                          </h3>
                                           <small>Đúng hạn</small>
                                         </div>
                                         <ProgressBar style={{ height: "30px" }}>
-                                          <ProgressBar variant="success" now={thongKeTraPhong.phanTramDungHan} key={1} />
-                                          <ProgressBar variant="danger" now={thongKeTraPhong.phanTramTreHan} key={2} />
+                                          <ProgressBar
+                                            variant="success"
+                                            now={
+                                              thongKeTraPhong.phanTramDungHan
+                                            }
+                                            key={1}
+                                          />
+                                          <ProgressBar
+                                            variant="danger"
+                                            now={thongKeTraPhong.phanTramTreHan}
+                                            key={2}
+                                          />
                                         </ProgressBar>
                                       </div>
                                     </Card.Body>
                                   </Card>
                                 </Col>
                               </Row>
-                              
+
                               {/* Thống kê chi tiết */}
                               <div className="mt-4">
                                 <Accordion>
                                   <Accordion.Item eventKey="0">
-                                    <Accordion.Header>Thống kê theo người mượn</Accordion.Header>
+                                    <Accordion.Header>
+                                      Thống kê theo người mượn
+                                    </Accordion.Header>
                                     <Accordion.Body>
                                       <Table striped bordered hover responsive>
                                         <thead>
@@ -637,31 +854,66 @@ const BoardAdmin = () => {
                                               }
                                             })
                                             .map((item, index) => {
-                                              const tongSoLuot = item.tongSoLuot;
-                                              const phanTramDungHan = tongSoLuot > 0 ? (item.dungHan * 100 / tongSoLuot).toFixed(1) : 0;
+                                              const tongSoLuot =
+                                                item.tongSoLuot;
+                                              const phanTramDungHan =
+                                                tongSoLuot > 0
+                                                  ? (
+                                                      (item.dungHan * 100) /
+                                                      tongSoLuot
+                                                    ).toFixed(1)
+                                                  : 0;
                                               return (
                                                 <tr key={index}>
                                                   <td>{index + 1}</td>
                                                   <td>{item.tenNguoiMuon}</td>
-                                                  <td className="text-center">{tongSoLuot}</td>
-                                                  <td className="text-center text-success">{item.dungHan}</td>
-                                                  <td className="text-center text-danger">{item.treHan}</td>
+                                                  <td className="text-center">
+                                                    {tongSoLuot}
+                                                  </td>
+                                                  <td className="text-center text-success">
+                                                    {item.dungHan}
+                                                  </td>
+                                                  <td className="text-center text-danger">
+                                                    {item.treHan}
+                                                  </td>
                                                   <td>
                                                     <div className="d-flex align-items-center">
-                                                      <div style={{ width: "60px" }}>{phanTramDungHan}%</div>
-                                                      <ProgressBar 
-                                                        style={{ height: "8px", flex: 1 }}
-                                                        variant={phanTramDungHan >= 80 ? "success" : phanTramDungHan >= 50 ? "warning" : "danger"} 
-                                                        now={phanTramDungHan} 
+                                                      <div
+                                                        style={{
+                                                          width: "60px",
+                                                        }}
+                                                      >
+                                                        {phanTramDungHan}%
+                                                      </div>
+                                                      <ProgressBar
+                                                        style={{
+                                                          height: "8px",
+                                                          flex: 1,
+                                                        }}
+                                                        variant={
+                                                          phanTramDungHan >= 80
+                                                            ? "success"
+                                                            : phanTramDungHan >=
+                                                              50
+                                                            ? "warning"
+                                                            : "danger"
+                                                        }
+                                                        now={phanTramDungHan}
                                                       />
                                                     </div>
                                                   </td>
                                                 </tr>
                                               );
                                             })}
-                                          {thongKeTraPhong.thongKeTheoNguoiMuon.length === 0 && (
+                                          {thongKeTraPhong.thongKeTheoNguoiMuon
+                                            .length === 0 && (
                                             <tr>
-                                              <td colSpan="6" className="text-center">Không có dữ liệu</td>
+                                              <td
+                                                colSpan="6"
+                                                className="text-center"
+                                              >
+                                                Không có dữ liệu
+                                              </td>
                                             </tr>
                                           )}
                                         </tbody>
@@ -669,7 +921,9 @@ const BoardAdmin = () => {
                                     </Accordion.Body>
                                   </Accordion.Item>
                                   <Accordion.Item eventKey="1">
-                                    <Accordion.Header>Thống kê theo phòng</Accordion.Header>
+                                    <Accordion.Header>
+                                      Thống kê theo phòng
+                                    </Accordion.Header>
                                     <Accordion.Body>
                                       <Table striped bordered hover responsive>
                                         <thead>
@@ -693,32 +947,67 @@ const BoardAdmin = () => {
                                               }
                                             })
                                             .map((item, index) => {
-                                              const tongSoLuot = item.tongSoLuot;
-                                              const phanTramDungHan = tongSoLuot > 0 ? (item.dungHan * 100 / tongSoLuot).toFixed(1) : 0;
+                                              const tongSoLuot =
+                                                item.tongSoLuot;
+                                              const phanTramDungHan =
+                                                tongSoLuot > 0
+                                                  ? (
+                                                      (item.dungHan * 100) /
+                                                      tongSoLuot
+                                                    ).toFixed(1)
+                                                  : 0;
                                               return (
                                                 <tr key={index}>
                                                   <td>{index + 1}</td>
                                                   <td>{item.maPhong}</td>
                                                   <td>{item.viTri}</td>
-                                                  <td className="text-center">{tongSoLuot}</td>
-                                                  <td className="text-center text-success">{item.dungHan}</td>
-                                                  <td className="text-center text-danger">{item.treHan}</td>
+                                                  <td className="text-center">
+                                                    {tongSoLuot}
+                                                  </td>
+                                                  <td className="text-center text-success">
+                                                    {item.dungHan}
+                                                  </td>
+                                                  <td className="text-center text-danger">
+                                                    {item.treHan}
+                                                  </td>
                                                   <td>
                                                     <div className="d-flex align-items-center">
-                                                      <div style={{ width: "60px" }}>{phanTramDungHan}%</div>
-                                                      <ProgressBar 
-                                                        style={{ height: "8px", flex: 1 }}
-                                                        variant={phanTramDungHan >= 80 ? "success" : phanTramDungHan >= 50 ? "warning" : "danger"} 
-                                                        now={phanTramDungHan} 
+                                                      <div
+                                                        style={{
+                                                          width: "60px",
+                                                        }}
+                                                      >
+                                                        {phanTramDungHan}%
+                                                      </div>
+                                                      <ProgressBar
+                                                        style={{
+                                                          height: "8px",
+                                                          flex: 1,
+                                                        }}
+                                                        variant={
+                                                          phanTramDungHan >= 80
+                                                            ? "success"
+                                                            : phanTramDungHan >=
+                                                              50
+                                                            ? "warning"
+                                                            : "danger"
+                                                        }
+                                                        now={phanTramDungHan}
                                                       />
                                                     </div>
                                                   </td>
                                                 </tr>
                                               );
                                             })}
-                                          {thongKeTraPhong.thongKeTheoPhong.length === 0 && (
+                                          {thongKeTraPhong.thongKeTheoPhong
+                                            .length === 0 && (
                                             <tr>
-                                              <td colSpan="7" className="text-center">Không có dữ liệu</td>
+                                              <td
+                                                colSpan="7"
+                                                className="text-center"
+                                              >
+                                                Không có dữ liệu
+                                              </td>
                                             </tr>
                                           )}
                                         </tbody>
@@ -730,7 +1019,9 @@ const BoardAdmin = () => {
                             </div>
                           </div>
                         ) : (
-                          <Alert variant="info">Không có dữ liệu thống kê.</Alert>
+                          <Alert variant="info">
+                            Không có dữ liệu thống kê.
+                          </Alert>
                         )}
                       </>
                     ) : (
@@ -751,7 +1042,7 @@ const BoardAdmin = () => {
                             </InputGroup>
                           </Col>
                         </Row>
-                        
+
                         {filteredLichSu.length > 0 ? (
                           <Table striped bordered hover responsive>
                             <thead>
@@ -769,12 +1060,20 @@ const BoardAdmin = () => {
                             <tbody>
                               {filteredLichSu.map((ls, index) => {
                                 // Format dates
-                                const thoiGianMuon = new Date(ls.thoiGianMuon).toLocaleString();
-                                const thoiGianTraDuKien = new Date(ls.thoiGianTraDuKien).toLocaleString();
-                                const thoiGianTraThucTe = ls.thoiGianTraThucTe ? new Date(ls.thoiGianTraThucTe).toLocaleString() : "-";
-                                
+                                const thoiGianMuon = new Date(
+                                  ls.thoiGianMuon
+                                ).toLocaleString();
+                                const thoiGianTraDuKien = new Date(
+                                  ls.thoiGianTraDuKien
+                                ).toLocaleString();
+                                const thoiGianTraThucTe = ls.thoiGianTraThucTe
+                                  ? new Date(
+                                      ls.thoiGianTraThucTe
+                                    ).toLocaleString()
+                                  : "-";
+
                                 const isDungHan = ls.trangThaiTra === "DungHan";
-                                
+
                                 return (
                                   <tr key={index}>
                                     <td>{ls.maPhong}</td>
@@ -787,17 +1086,26 @@ const BoardAdmin = () => {
                                     <td>
                                       {!ls.thoiGianTraThucTe ? (
                                         <Badge bg="warning">
-                                          <FontAwesomeIcon icon={faCalendarAlt} className="me-1" />
+                                          <FontAwesomeIcon
+                                            icon={faCalendarAlt}
+                                            className="me-1"
+                                          />
                                           Chưa trả
                                         </Badge>
                                       ) : ls.trangThaiTra === "DungHan" ? (
                                         <Badge bg="success">
-                                          <FontAwesomeIcon icon={faCheckCircle} className="me-1" />
+                                          <FontAwesomeIcon
+                                            icon={faCheckCircle}
+                                            className="me-1"
+                                          />
                                           Đúng hạn
                                         </Badge>
                                       ) : (
                                         <Badge bg="danger">
-                                          <FontAwesomeIcon icon={faTimesCircle} className="me-1" />
+                                          <FontAwesomeIcon
+                                            icon={faTimesCircle}
+                                            className="me-1"
+                                          />
                                           Trễ hạn
                                         </Badge>
                                       )}
@@ -809,7 +1117,8 @@ const BoardAdmin = () => {
                           </Table>
                         ) : (
                           <Alert variant="info">
-                            Không tìm thấy lịch sử mượn phòng phù hợp với từ khóa "{searchTerm}".
+                            Không tìm thấy lịch sử mượn phòng phù hợp với từ
+                            khóa "{searchTerm}".
                           </Alert>
                         )}
                       </>
@@ -824,11 +1133,11 @@ const BoardAdmin = () => {
           </Col>
         </Row>
       </Tab.Container>
-      
+
       {/* Modal xem tất cả phản hồi */}
-      <Modal 
-        show={showAllFeedbacksModal} 
-        onHide={() => setShowAllFeedbacksModal(false)} 
+      <Modal
+        show={showAllFeedbacksModal}
+        onHide={() => setShowAllFeedbacksModal(false)}
         size="lg"
         scrollable
       >
@@ -859,38 +1168,56 @@ const BoardAdmin = () => {
               </Form.Group>
             </Col>
           </Row>
-          
+
           {getFilteredFeedbacks().length > 0 ? (
             <div className="list-group">
               {getFilteredFeedbacks().map((feedback, index) => (
-                <div className="list-group-item" key={feedback.idPhanHoi || `all-feedback-${index}`}>
+                <div
+                  className="list-group-item"
+                  key={feedback.idPhanHoi || `all-feedback-${index}`}
+                >
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <h6 className="mb-0">
                       <strong>{feedback.maPhong}</strong> ({feedback.viTri})
-                      <Badge 
-                        bg={feedback.rating >= 4 ? "success" : feedback.rating >= 3 ? "warning" : "danger"} 
+                      <Badge
+                        bg={
+                          feedback.rating >= 4
+                            ? "success"
+                            : feedback.rating >= 3
+                            ? "warning"
+                            : "danger"
+                        }
                         className="ms-2"
                       >
                         {feedback.rating}
                       </Badge>
                     </h6>
-                    <small className="text-muted">{feedback.daysAgo} ngày trước</small>
+                    <small className="text-muted">
+                      {feedback.daysAgo} ngày trước
+                    </small>
                   </div>
                   <p className="mb-2">{feedback.comment}</p>
                   <div className="d-flex justify-content-between">
-                    <small className="text-muted">Người phản hồi: {feedback.userName}</small>
+                    <small className="text-muted">
+                      Người phản hồi: {feedback.userName}
+                    </small>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center">
-              <p className="text-info">Không tìm thấy phản hồi nào phù hợp với điều kiện lọc.</p>
+              <p className="text-info">
+                Không tìm thấy phản hồi nào phù hợp với điều kiện lọc.
+              </p>
             </div>
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAllFeedbacksModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowAllFeedbacksModal(false)}
+          >
             Đóng
           </Button>
         </Modal.Footer>
@@ -899,4 +1226,4 @@ const BoardAdmin = () => {
   );
 };
 
-export default BoardAdmin; 
+export default BoardAdmin;

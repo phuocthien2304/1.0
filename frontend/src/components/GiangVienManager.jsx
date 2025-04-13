@@ -1,9 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Table, Button, Form, Modal, Badge, ProgressBar } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Table,
+  Button,
+  Form,
+  Modal,
+  Badge,
+  ProgressBar,
+} from "react-bootstrap";
 import axios from "axios";
 import authHeader from "../services/auth-header";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faTrash, faSearch, faKey, faChartBar, faUser, faUsers } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faTrash,
+  faSearch,
+  faKey,
+  faChartBar,
+  faUser,
+  faUsers,
+} from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 const API_URL = "http://localhost:8080/api/quanly";
@@ -26,7 +45,7 @@ const GiangVienManager = ({ refreshKey }) => {
     gioiTinh: "Nam",
     khoa: "",
     userId: "",
-    password: ""
+    password: "",
   });
   const [statsData, setStatsData] = useState(null);
   const [statsLoading, setStatsLoading] = useState(false);
@@ -39,7 +58,10 @@ const GiangVienManager = ({ refreshKey }) => {
   // Lấy danh sách giảng viên khi refreshKey thay đổi
   useEffect(() => {
     if (refreshKey) {
-      console.log("GiangVienManager refreshing due to refreshKey change:", refreshKey);
+      console.log(
+        "GiangVienManager refreshing due to refreshKey change:",
+        refreshKey
+      );
       fetchGiangVienList();
     }
   }, [refreshKey]);
@@ -48,12 +70,14 @@ const GiangVienManager = ({ refreshKey }) => {
   const fetchGiangVienList = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/giangvien`, { headers: authHeader() });
+      const response = await axios.get(`${API_URL}/giangvien`, {
+        headers: authHeader(),
+      });
       setGiangVienList(response.data);
-      
+
       // Lấy danh sách khoa từ dữ liệu giảng viên
       extractKhoaList(response.data);
-      
+
       setLoading(false);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách giảng viên:", error);
@@ -61,16 +85,18 @@ const GiangVienManager = ({ refreshKey }) => {
       setLoading(false);
     }
   };
-  
+
   // Trích xuất danh sách khoa từ dữ liệu giảng viên
   const extractKhoaList = (giangVienData) => {
     // Lấy các giá trị khoa duy nhất từ danh sách giảng viên
-    const uniqueKhoa = [...new Set(
-      giangVienData
-        .filter(gv => gv.khoa && gv.khoa.trim() !== '')
-        .map(gv => gv.khoa)
-    )].sort();
-    
+    const uniqueKhoa = [
+      ...new Set(
+        giangVienData
+          .filter((gv) => gv.khoa && gv.khoa.trim() !== "")
+          .map((gv) => gv.khoa)
+      ),
+    ].sort();
+
     setKhoaList(uniqueKhoa);
   };
 
@@ -78,7 +104,9 @@ const GiangVienManager = ({ refreshKey }) => {
   const fetchGiangVienStats = async () => {
     setStatsLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/giangvien/thongke`, { headers: authHeader() });
+      const response = await axios.get(`${API_URL}/giangvien/thongke`, {
+        headers: authHeader(),
+      });
       setStatsData(response.data);
       setStatsLoading(false);
     } catch (error) {
@@ -92,7 +120,7 @@ const GiangVienManager = ({ refreshKey }) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -104,7 +132,7 @@ const GiangVienManager = ({ refreshKey }) => {
       setFormData({
         ...formData,
         userId: "",
-        password: ""
+        password: "",
       });
     }
   };
@@ -119,7 +147,7 @@ const GiangVienManager = ({ refreshKey }) => {
       lienHe: giangVien.lienHe || "",
       gioiTinh: giangVien.gioiTinh,
       khoa: giangVien.khoa,
-      password: "" // Password luôn trống khi sửa
+      password: "", // Password luôn trống khi sửa
     });
     setShowTaiKhoanForm(false);
     setShowEditModal(true);
@@ -134,12 +162,12 @@ const GiangVienManager = ({ refreshKey }) => {
 
     try {
       const requestData = { ...formData };
-      
+
       // Nếu mật khẩu trống, không gửi lên server
       if (!requestData.password) {
         delete requestData.password;
       }
-      
+
       // Không cần gửi userId khi cập nhật
       delete requestData.userId;
 
@@ -152,7 +180,10 @@ const GiangVienManager = ({ refreshKey }) => {
       toast.success("Cập nhật giảng viên thành công!");
       fetchGiangVienList();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi cập nhật giảng viên.");
+      toast.error(
+        error.response?.data?.message ||
+          "Đã có lỗi xảy ra khi cập nhật giảng viên."
+      );
     }
   };
 
@@ -165,15 +196,16 @@ const GiangVienManager = ({ refreshKey }) => {
   // Xóa giảng viên
   const handleDeleteGiangVien = async () => {
     try {
-      await axios.delete(
-        `${API_URL}/giangvien/${currentGiangVien.maGV}`,
-        { headers: authHeader() }
-      );
+      await axios.delete(`${API_URL}/giangvien/${currentGiangVien.maGV}`, {
+        headers: authHeader(),
+      });
       setShowConfirmModal(false);
       toast.success("Giảng viên đã được xóa thành công!");
       fetchGiangVienList();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi xóa giảng viên.");
+      toast.error(
+        error.response?.data?.message || "Đã có lỗi xảy ra khi xóa giảng viên."
+      );
       setShowConfirmModal(false);
     }
   };
@@ -191,7 +223,7 @@ const GiangVienManager = ({ refreshKey }) => {
         return gioiTinh;
     }
   };
-  
+
   // Hiển thị modal thống kê
   const handleShowStatsModal = () => {
     fetchGiangVienStats();
@@ -199,20 +231,25 @@ const GiangVienManager = ({ refreshKey }) => {
   };
 
   // Lọc danh sách giảng viên theo từ khóa tìm kiếm
-  const filteredGiangVien = giangVienList.filter(gv =>
-    gv.maGV.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    gv.hoTen.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    gv.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (gv.khoa && gv.khoa.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredGiangVien = giangVienList.filter(
+    (gv) =>
+      gv.maGV.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      gv.hoTen.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      gv.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (gv.khoa && gv.khoa.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
-    <Container fluid>
+    <Container>
       <Card className="mb-4">
         <Card.Header className="d-flex justify-content-between align-items-center">
           <h5 className="mb-0">Quản lý giảng viên</h5>
           <div>
-            <Button variant="info" onClick={handleShowStatsModal} id="giangvien-stats-btn">
+            <Button
+              variant="outline-light"
+              onClick={handleShowStatsModal}
+              id="giangvien-stats-btn"
+            >
               <FontAwesomeIcon icon={faChartBar} /> Báo cáo thống kê
             </Button>
           </div>
@@ -235,7 +272,7 @@ const GiangVienManager = ({ refreshKey }) => {
               </Form.Group>
             </Col>
           </Row>
-          
+
           <div className="table-responsive">
             <Table striped hover className="align-middle">
               <thead>
@@ -253,7 +290,10 @@ const GiangVienManager = ({ refreshKey }) => {
                 {loading ? (
                   <tr>
                     <td colSpan="7" className="text-center">
-                      <div className="spinner-border text-primary" role="status">
+                      <div
+                        className="spinner-border text-primary"
+                        role="status"
+                      >
                         <span className="visually-hidden">Loading...</span>
                       </div>
                     </td>
@@ -274,10 +314,19 @@ const GiangVienManager = ({ refreshKey }) => {
                       <td>{renderGioiTinh(giangVien.gioiTinh)}</td>
                       <td>{giangVien.khoa || "Chưa phân khoa"}</td>
                       <td>
-                        <Button variant="outline-primary" size="sm" className="me-1" onClick={() => handleShowEditModal(giangVien)}>
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          className="mb-1"
+                          onClick={() => handleShowEditModal(giangVien)}
+                        >
                           <FontAwesomeIcon icon={faEdit} />
                         </Button>
-                        <Button variant="outline-danger" size="sm" onClick={() => handleShowDeleteConfirm(giangVien)}>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => handleShowDeleteConfirm(giangVien)}
+                        >
                           <FontAwesomeIcon icon={faTrash} />
                         </Button>
                       </td>
@@ -291,7 +340,12 @@ const GiangVienManager = ({ refreshKey }) => {
       </Card>
 
       {/* Modal Sửa giảng viên */}
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} backdrop="static" size="lg">
+      <Modal
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
+        backdrop="static"
+        size="lg"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Sửa giảng viên {currentGiangVien?.hoTen}</Modal.Title>
         </Modal.Header>
@@ -301,16 +355,14 @@ const GiangVienManager = ({ refreshKey }) => {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Mã giảng viên</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={formData.maGV}
-                    disabled
-                  />
+                  <Form.Control type="text" value={formData.maGV} disabled />
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Khoa/Chuyên ngành <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Khoa/Chuyên ngành <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Select
                     name="khoa"
                     value={formData.khoa}
@@ -318,7 +370,7 @@ const GiangVienManager = ({ refreshKey }) => {
                     required
                   >
                     <option value="">-- Chọn khoa/chuyên ngành --</option>
-                    {khoaList.map(khoa => (
+                    {khoaList.map((khoa) => (
                       <option key={khoa} value={khoa}>
                         {khoa}
                       </option>
@@ -332,10 +384,12 @@ const GiangVienManager = ({ refreshKey }) => {
                       className="mt-2"
                       name="khoa"
                       placeholder="Nhập tên khoa mới"
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        khoa: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          khoa: e.target.value,
+                        })
+                      }
                       required
                     />
                   )}
@@ -346,7 +400,9 @@ const GiangVienManager = ({ refreshKey }) => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Họ tên <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Họ tên <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="text"
                     name="hoTen"
@@ -358,7 +414,9 @@ const GiangVienManager = ({ refreshKey }) => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Email <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Email <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="email"
                     name="email"
@@ -384,7 +442,9 @@ const GiangVienManager = ({ refreshKey }) => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Giới tính <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Giới tính <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Select
                     name="gioiTinh"
                     value={formData.gioiTinh}
@@ -402,9 +462,15 @@ const GiangVienManager = ({ refreshKey }) => {
             <Row>
               <Col>
                 <Form.Group className="mb-3">
-                  <Button variant="link" onClick={handleToggleTaiKhoanForm} className="p-0">
+                  <Button
+                    variant="link"
+                    onClick={handleToggleTaiKhoanForm}
+                    className="p-0"
+                  >
                     <FontAwesomeIcon icon={faKey} className="me-1" />
-                    {showTaiKhoanForm ? "Ẩn cập nhật mật khẩu" : "Cập nhật mật khẩu"}
+                    {showTaiKhoanForm
+                      ? "Ẩn cập nhật mật khẩu"
+                      : "Cập nhật mật khẩu"}
                   </Button>
                 </Form.Group>
               </Col>
@@ -417,7 +483,9 @@ const GiangVienManager = ({ refreshKey }) => {
                   <Row>
                     <Col>
                       <Form.Group className="mb-3">
-                        <Form.Label>Mật khẩu mới <span className="text-danger">*</span></Form.Label>
+                        <Form.Label>
+                          Mật khẩu mới <span className="text-danger">*</span>
+                        </Form.Label>
                         <Form.Control
                           type="password"
                           name="password"
@@ -452,11 +520,20 @@ const GiangVienManager = ({ refreshKey }) => {
           <Modal.Title>Xác nhận xóa</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Bạn có chắc chắn muốn xóa giảng viên <strong>{currentGiangVien?.hoTen}</strong>?</p>
-          <p className="text-danger">Lưu ý: Hành động này không thể hoàn tác và sẽ xóa cả thông tin người dùng và tài khoản.</p>
+          <p>
+            Bạn có chắc chắn muốn xóa giảng viên{" "}
+            <strong>{currentGiangVien?.hoTen}</strong>?
+          </p>
+          <p className="text-danger">
+            Lưu ý: Hành động này không thể hoàn tác và sẽ xóa cả thông tin người
+            dùng và tài khoản.
+          </p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowConfirmModal(false)}
+          >
             Hủy
           </Button>
           <Button variant="danger" onClick={handleDeleteGiangVien}>
@@ -466,7 +543,11 @@ const GiangVienManager = ({ refreshKey }) => {
       </Modal>
 
       {/* Modal Thống kê giảng viên */}
-      <Modal show={showStatsModal} onHide={() => setShowStatsModal(false)} size="lg">
+      <Modal
+        show={showStatsModal}
+        onHide={() => setShowStatsModal(false)}
+        size="lg"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Báo cáo & Thống kê giảng viên</Modal.Title>
         </Modal.Header>
@@ -483,7 +564,9 @@ const GiangVienManager = ({ refreshKey }) => {
                 <Col md={6} className="text-center">
                   <Card className="h-100">
                     <Card.Body>
-                      <h2 className="display-4">{statsData?.tongSo || giangVienList.length}</h2>
+                      <h2 className="display-4">
+                        {statsData?.tongSo || giangVienList.length}
+                      </h2>
                       <p className="text-muted">Tổng số giảng viên</p>
                     </Card.Body>
                   </Card>
@@ -491,13 +574,15 @@ const GiangVienManager = ({ refreshKey }) => {
                 <Col md={6} className="text-center">
                   <Card className="h-100">
                     <Card.Body>
-                      <h2 className="display-4">{statsData?.soYeuCauMuonPhong || 0}</h2>
+                      <h2 className="display-4">
+                        {statsData?.soYeuCauMuonPhong || 0}
+                      </h2>
                       <p className="text-muted">Số yêu cầu mượn phòng</p>
                     </Card.Body>
                   </Card>
                 </Col>
               </Row>
-              
+
               <h5 className="mb-3">Phân bố giảng viên theo khoa</h5>
               <Table bordered className="mb-4">
                 <thead>
@@ -508,53 +593,58 @@ const GiangVienManager = ({ refreshKey }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {statsData?.thongKeTheoKhoa ? (
-                    Object.entries(statsData.thongKeTheoKhoa).map(([khoa, soLuong]) => {
-                      const tyLe = (soLuong / (statsData.tongSo || giangVienList.length)) * 100;
-                      return (
-                        <tr key={khoa}>
-                          <td>{khoa || "Chưa phân khoa"}</td>
-                          <td>{soLuong}</td>
-                          <td>
-                            <ProgressBar 
-                              now={tyLe} 
-                              label={`${Math.round(tyLe)}%`}
-                              variant="info"
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })
-                  ) : (
-                    // Nếu không có dữ liệu từ API, tính toán trực tiếp từ giangVienList
-                    (() => {
-                      const khoaCount = {};
-                      giangVienList.forEach(gv => {
-                        const khoa = gv.khoa || "Chưa phân khoa";
-                        khoaCount[khoa] = (khoaCount[khoa] || 0) + 1;
-                      });
-                      
-                      return Object.entries(khoaCount).map(([khoa, soLuong]) => {
-                        const tyLe = (soLuong / giangVienList.length) * 100;
-                        return (
-                          <tr key={khoa}>
-                            <td>{khoa}</td>
-                            <td>{soLuong}</td>
-                            <td>
-                              <ProgressBar 
-                                now={tyLe} 
-                                label={`${Math.round(tyLe)}%`}
-                                variant="info"
-                              />
-                            </td>
-                          </tr>
+                  {statsData?.thongKeTheoKhoa
+                    ? Object.entries(statsData.thongKeTheoKhoa).map(
+                        ([khoa, soLuong]) => {
+                          const tyLe =
+                            (soLuong /
+                              (statsData.tongSo || giangVienList.length)) *
+                            100;
+                          return (
+                            <tr key={khoa}>
+                              <td>{khoa || "Chưa phân khoa"}</td>
+                              <td>{soLuong}</td>
+                              <td>
+                                <ProgressBar
+                                  now={tyLe}
+                                  label={`${Math.round(tyLe)}%`}
+                                  variant="info"
+                                />
+                              </td>
+                            </tr>
+                          );
+                        }
+                      )
+                    : // Nếu không có dữ liệu từ API, tính toán trực tiếp từ giangVienList
+                      (() => {
+                        const khoaCount = {};
+                        giangVienList.forEach((gv) => {
+                          const khoa = gv.khoa || "Chưa phân khoa";
+                          khoaCount[khoa] = (khoaCount[khoa] || 0) + 1;
+                        });
+
+                        return Object.entries(khoaCount).map(
+                          ([khoa, soLuong]) => {
+                            const tyLe = (soLuong / giangVienList.length) * 100;
+                            return (
+                              <tr key={khoa}>
+                                <td>{khoa}</td>
+                                <td>{soLuong}</td>
+                                <td>
+                                  <ProgressBar
+                                    now={tyLe}
+                                    label={`${Math.round(tyLe)}%`}
+                                    variant="info"
+                                  />
+                                </td>
+                              </tr>
+                            );
+                          }
                         );
-                      });
-                    })()
-                  )}
+                      })()}
                 </tbody>
               </Table>
-              
+
               {statsData?.thongKeGioiTinh && (
                 <>
                   <h5 className="mb-3">Phân bố giảng viên theo giới tính</h5>
@@ -567,37 +657,57 @@ const GiangVienManager = ({ refreshKey }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {Object.entries(statsData.thongKeGioiTinh).map(([gioiTinh, soLuong]) => {
-                        const tyLe = (soLuong / (statsData.tongSo || giangVienList.length)) * 100;
-                        let displayGioiTinh = gioiTinh;
-                        switch (gioiTinh) {
-                          case "Nam": displayGioiTinh = "Nam"; break;
-                          case "Nu": displayGioiTinh = "Nữ"; break;
-                          case "KhongXacDinh": displayGioiTinh = "Không xác định"; break;
-                          default: displayGioiTinh = gioiTinh;
+                      {Object.entries(statsData.thongKeGioiTinh).map(
+                        ([gioiTinh, soLuong]) => {
+                          const tyLe =
+                            (soLuong /
+                              (statsData.tongSo || giangVienList.length)) *
+                            100;
+                          let displayGioiTinh = gioiTinh;
+                          switch (gioiTinh) {
+                            case "Nam":
+                              displayGioiTinh = "Nam";
+                              break;
+                            case "Nu":
+                              displayGioiTinh = "Nữ";
+                              break;
+                            case "KhongXacDinh":
+                              displayGioiTinh = "Không xác định";
+                              break;
+                            default:
+                              displayGioiTinh = gioiTinh;
+                          }
+                          return (
+                            <tr key={gioiTinh}>
+                              <td>{displayGioiTinh}</td>
+                              <td>{soLuong}</td>
+                              <td>
+                                <ProgressBar
+                                  now={tyLe}
+                                  label={`${Math.round(tyLe)}%`}
+                                  variant={
+                                    gioiTinh === "Nam"
+                                      ? "primary"
+                                      : gioiTinh === "Nu"
+                                      ? "danger"
+                                      : "secondary"
+                                  }
+                                />
+                              </td>
+                            </tr>
+                          );
                         }
-                        return (
-                          <tr key={gioiTinh}>
-                            <td>{displayGioiTinh}</td>
-                            <td>{soLuong}</td>
-                            <td>
-                              <ProgressBar 
-                                now={tyLe} 
-                                label={`${Math.round(tyLe)}%`}
-                                variant={gioiTinh === "Nam" ? "primary" : gioiTinh === "Nu" ? "danger" : "secondary"}
-                              />
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      )}
                     </tbody>
                   </Table>
                 </>
               )}
-              
+
               {statsData?.topMuonPhong && statsData.topMuonPhong.length > 0 && (
                 <>
-                  <h5 className="mb-3">Top 5 giảng viên mượn phòng nhiều nhất</h5>
+                  <h5 className="mb-3">
+                    Top 5 giảng viên mượn phòng nhiều nhất
+                  </h5>
                   <Table bordered striped className="mb-4">
                     <thead>
                       <tr>
@@ -614,7 +724,9 @@ const GiangVienManager = ({ refreshKey }) => {
                           <td>{item.hoTen}</td>
                           <td>{item.khoa || "Chưa phân khoa"}</td>
                           <td>
-                            <Badge bg="primary" pill>{item.soLanMuon}</Badge>
+                            <Badge bg="primary" pill>
+                              {item.soLanMuon}
+                            </Badge>
                           </td>
                         </tr>
                       ))}
@@ -635,4 +747,4 @@ const GiangVienManager = ({ refreshKey }) => {
   );
 };
 
-export default GiangVienManager; 
+export default GiangVienManager;

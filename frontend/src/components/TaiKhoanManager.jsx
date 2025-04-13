@@ -1,9 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Table, Button, Form, Modal, Badge } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Table,
+  Button,
+  Form,
+  Modal,
+  Badge,
+} from "react-bootstrap";
 import axios from "axios";
 import authHeader from "../services/auth-header";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEdit, faLock, faUnlock, faUserPlus, faSearch } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEdit,
+  faLock,
+  faUnlock,
+  faUserPlus,
+  faSearch,
+} from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 const API_URL = "http://localhost:8080/api/quanly";
@@ -26,7 +42,7 @@ const TaiKhoanManager = (props) => {
     gioiTinh: "Nam",
     vaiTro: "ROLE_SV",
     maLop: "",
-    khoa: ""
+    khoa: "",
   });
 
   // Lấy danh sách tài khoản khi component được render
@@ -40,7 +56,9 @@ const TaiKhoanManager = (props) => {
   const fetchTaiKhoanList = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/taikhoan`, { headers: authHeader() });
+      const response = await axios.get(`${API_URL}/taikhoan`, {
+        headers: authHeader(),
+      });
       setTaiKhoanList(response.data);
       setLoading(false);
     } catch (error) {
@@ -53,7 +71,9 @@ const TaiKhoanManager = (props) => {
   // Lấy danh sách lớp học từ API
   const fetchLopHocList = async () => {
     try {
-      const response = await axios.get(`${API_URL}/lophoc`, { headers: authHeader() });
+      const response = await axios.get(`${API_URL}/lophoc`, {
+        headers: authHeader(),
+      });
       setLopHocList(response.data);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách lớp học:", error);
@@ -66,15 +86,19 @@ const TaiKhoanManager = (props) => {
   // Lấy danh sách khoa từ API
   const fetchKhoaList = async () => {
     try {
-      const response = await axios.get(`${API_URL}/giangvien`, { headers: authHeader() });
-      
+      const response = await axios.get(`${API_URL}/giangvien`, {
+        headers: authHeader(),
+      });
+
       // Trích xuất danh sách khoa duy nhất từ dữ liệu giảng viên
-      const uniqueKhoa = [...new Set(
-        response.data
-          .filter(gv => gv.khoa && gv.khoa.trim() !== '')
-          .map(gv => gv.khoa)
-      )].sort();
-      
+      const uniqueKhoa = [
+        ...new Set(
+          response.data
+            .filter((gv) => gv.khoa && gv.khoa.trim() !== "")
+            .map((gv) => gv.khoa)
+        ),
+      ].sort();
+
       setKhoaList(uniqueKhoa);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách khoa:", error);
@@ -89,7 +113,7 @@ const TaiKhoanManager = (props) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -104,14 +128,20 @@ const TaiKhoanManager = (props) => {
       gioiTinh: "Nam",
       vaiTro: "ROLE_SV",
       maLop: "",
-      khoa: ""
+      khoa: "",
     });
     setShowAddModal(true);
   };
 
   // Thêm tài khoản mới
   const handleAddTaiKhoan = async () => {
-    if (!formData.userId || !formData.password || !formData.hoTen || !formData.email || !formData.vaiTro) {
+    if (
+      !formData.userId ||
+      !formData.password ||
+      !formData.hoTen ||
+      !formData.email ||
+      !formData.vaiTro
+    ) {
       toast.error("Vui lòng điền đầy đủ thông tin bắt buộc.");
       return;
     }
@@ -121,30 +151,30 @@ const TaiKhoanManager = (props) => {
       toast.error("Vui lòng chọn lớp học cho sinh viên.");
       return;
     }
-    
+
     // Kiểm tra nếu là giảng viên thì phải chọn khoa
     if (formData.vaiTro === "ROLE_GV" && !formData.khoa) {
       toast.error("Vui lòng chọn khoa cho giảng viên.");
       return;
     }
-    
+
     console.log("formData", formData);
     try {
-      const response = await axios.post(
-        `${API_URL}/taikhoan`,
-        formData,
-        { headers: authHeader() }
-      );
+      const response = await axios.post(`${API_URL}/taikhoan`, formData, {
+        headers: authHeader(),
+      });
       setShowAddModal(false);
       toast.success("Tài khoản đã được tạo thành công!");
       fetchTaiKhoanList();
-      
+
       // Gọi callback khi tài khoản được tạo thành công
       if (props.onTaiKhoanAdded) {
         props.onTaiKhoanAdded(formData.vaiTro);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi tạo tài khoản.");
+      toast.error(
+        error.response?.data?.message || "Đã có lỗi xảy ra khi tạo tài khoản."
+      );
     }
   };
 
@@ -160,7 +190,7 @@ const TaiKhoanManager = (props) => {
       gioiTinh: taiKhoan.gioiTinh,
       vaiTro: taiKhoan.vaiTro,
       maLop: taiKhoan.maLop || "",
-      khoa: taiKhoan.khoa || ""
+      khoa: taiKhoan.khoa || "",
     });
     setShowEditModal(true);
   };
@@ -177,7 +207,7 @@ const TaiKhoanManager = (props) => {
       toast.error("Vui lòng chọn lớp học cho sinh viên.");
       return;
     }
-    
+
     try {
       const response = await axios.put(
         `${API_URL}/taikhoan/${currentTaiKhoan.id}`,
@@ -187,13 +217,16 @@ const TaiKhoanManager = (props) => {
       setShowEditModal(false);
       toast.success("Cập nhật tài khoản thành công!");
       fetchTaiKhoanList();
-      
+
       // Gọi callback khi tài khoản được cập nhật thành công
       if (props.onTaiKhoanAdded) {
         props.onTaiKhoanAdded(formData.vaiTro);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi cập nhật tài khoản.");
+      toast.error(
+        error.response?.data?.message ||
+          "Đã có lỗi xảy ra khi cập nhật tài khoản."
+      );
     }
   };
 
@@ -206,10 +239,17 @@ const TaiKhoanManager = (props) => {
         { trangThai: newStatus },
         { headers: authHeader() }
       );
-      toast.success(newStatus === "HoatDong" ? "Tài khoản đã được kích hoạt!" : "Tài khoản đã bị khóa!");
+      toast.success(
+        newStatus === "HoatDong"
+          ? "Tài khoản đã được kích hoạt!"
+          : "Tài khoản đã bị khóa!"
+      );
       fetchTaiKhoanList();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi thay đổi trạng thái tài khoản.");
+      toast.error(
+        error.response?.data?.message ||
+          "Đã có lỗi xảy ra khi thay đổi trạng thái tài khoản."
+      );
     }
   };
 
@@ -237,18 +277,19 @@ const TaiKhoanManager = (props) => {
   };
 
   // Lọc danh sách tài khoản theo từ khóa tìm kiếm
-  const filteredTaiKhoan = taiKhoanList.filter(tk =>
-    tk.hoTen.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tk.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tk.id.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTaiKhoan = taiKhoanList.filter(
+    (tk) =>
+      tk.hoTen.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tk.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tk.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
+
   return (
-    <Container fluid>
+    <Container>
       <Card className="mb-4">
         <Card.Header className="d-flex justify-content-between align-items-center">
           <h5 className="mb-0">Quản lý tài khoản</h5>
-          <Button variant="success" onClick={handleShowAddModal}>
+          <Button variant="outline-light" onClick={handleShowAddModal}>
             <FontAwesomeIcon icon={faUserPlus} /> Thêm tài khoản
           </Button>
         </Card.Header>
@@ -270,7 +311,7 @@ const TaiKhoanManager = (props) => {
               </Form.Group>
             </Col>
           </Row>
-          
+
           <div className="table-responsive">
             <Table striped hover className="align-middle">
               <thead>
@@ -288,7 +329,10 @@ const TaiKhoanManager = (props) => {
                 {loading ? (
                   <tr>
                     <td colSpan="7" className="text-center">
-                      <div className="spinner-border text-primary" role="status">
+                      <div
+                        className="spinner-border text-primary"
+                        role="status"
+                      >
                         <span className="visually-hidden">Loading...</span>
                       </div>
                     </td>
@@ -309,16 +353,31 @@ const TaiKhoanManager = (props) => {
                       <td>{renderVaiTro(taiKhoan.vaiTro)}</td>
                       <td>{renderTrangThai(taiKhoan.trangThai)}</td>
                       <td>
-                        <Button variant="outline-primary" size="sm" className="me-1" onClick={() => handleShowEditModal(taiKhoan)}>
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          className="mb-1"
+                          onClick={() => handleShowEditModal(taiKhoan)}
+                        >
                           <FontAwesomeIcon icon={faEdit} />
                         </Button>
-                        <Button 
-                          variant={taiKhoan.trangThai === "HoatDong" ? "outline-warning" : "outline-success"} 
-                          size="sm" 
-                          className="me-1"
+                        <Button
+                          variant={
+                            taiKhoan.trangThai === "HoatDong"
+                              ? "outline-warning"
+                              : "outline-success"
+                          }
+                          size="sm"
+                          className=""
                           onClick={() => handleToggleTaiKhoanStatus(taiKhoan)}
                         >
-                          <FontAwesomeIcon icon={taiKhoan.trangThai === "HoatDong" ? faLock : faUnlock} />
+                          <FontAwesomeIcon
+                            icon={
+                              taiKhoan.trangThai === "HoatDong"
+                                ? faLock
+                                : faUnlock
+                            }
+                          />
                         </Button>
                       </td>
                     </tr>
@@ -331,7 +390,12 @@ const TaiKhoanManager = (props) => {
       </Card>
 
       {/* Modal Thêm tài khoản */}
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} backdrop="static" size="lg">
+      <Modal
+        show={showAddModal}
+        onHide={() => setShowAddModal(false)}
+        backdrop="static"
+        size="lg"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Thêm tài khoản mới</Modal.Title>
         </Modal.Header>
@@ -340,7 +404,9 @@ const TaiKhoanManager = (props) => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Tên đăng nhập <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Tên đăng nhập <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="text"
                     name="userId"
@@ -352,7 +418,9 @@ const TaiKhoanManager = (props) => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Mật khẩu <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Mật khẩu <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="password"
                     name="password"
@@ -367,7 +435,9 @@ const TaiKhoanManager = (props) => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Họ tên <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Họ tên <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="text"
                     name="hoTen"
@@ -379,7 +449,9 @@ const TaiKhoanManager = (props) => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Email <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Email <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="email"
                     name="email"
@@ -405,7 +477,9 @@ const TaiKhoanManager = (props) => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Giới tính <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Giới tính <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Select
                     name="gioiTinh"
                     value={formData.gioiTinh}
@@ -423,7 +497,9 @@ const TaiKhoanManager = (props) => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Vai trò <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Vai trò <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Select
                     name="vaiTro"
                     value={formData.vaiTro}
@@ -439,7 +515,9 @@ const TaiKhoanManager = (props) => {
               <Col md={6}>
                 {formData.vaiTro === "ROLE_GV" && (
                   <Form.Group className="mb-3">
-                    <Form.Label>Khoa <span className="text-danger">*</span></Form.Label>
+                    <Form.Label>
+                      Khoa <span className="text-danger">*</span>
+                    </Form.Label>
                     <Form.Select
                       name="khoa"
                       value={formData.khoa}
@@ -447,7 +525,7 @@ const TaiKhoanManager = (props) => {
                       required
                     >
                       <option value="">-- Chọn khoa --</option>
-                      {khoaList.map(khoa => (
+                      {khoaList.map((khoa) => (
                         <option key={khoa} value={khoa}>
                           {khoa}
                         </option>
@@ -460,10 +538,12 @@ const TaiKhoanManager = (props) => {
                         className="mt-2"
                         name="khoa"
                         placeholder="Nhập tên khoa mới"
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          khoa: e.target.value
-                        })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            khoa: e.target.value,
+                          })
+                        }
                         required
                       />
                     )}
@@ -471,7 +551,9 @@ const TaiKhoanManager = (props) => {
                 )}
                 {formData.vaiTro === "ROLE_SV" && (
                   <Form.Group className="mb-3">
-                    <Form.Label>Lớp học <span className="text-danger">*</span></Form.Label>
+                    <Form.Label>
+                      Lớp học <span className="text-danger">*</span>
+                    </Form.Label>
                     <Form.Select
                       name="maLop"
                       value={formData.maLop}
@@ -479,7 +561,7 @@ const TaiKhoanManager = (props) => {
                       required
                     >
                       <option value="">-- Chọn lớp học --</option>
-                      {lopHocList.map(lop => (
+                      {lopHocList.map((lop) => (
                         <option key={lop.maLop} value={lop.maLop}>
                           {lop.tenLop} ({lop.maLop})
                         </option>
@@ -502,7 +584,12 @@ const TaiKhoanManager = (props) => {
       </Modal>
 
       {/* Modal Sửa tài khoản */}
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} backdrop="static" size="lg">
+      <Modal
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
+        backdrop="static"
+        size="lg"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Sửa tài khoản {currentTaiKhoan?.hoTen}</Modal.Title>
         </Modal.Header>
@@ -512,11 +599,7 @@ const TaiKhoanManager = (props) => {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Tên đăng nhập</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={formData.userId}
-                    disabled
-                  />
+                  <Form.Control type="text" value={formData.userId} disabled />
                 </Form.Group>
               </Col>
               <Col md={6}>
@@ -536,7 +619,9 @@ const TaiKhoanManager = (props) => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Họ tên <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Họ tên <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="text"
                     name="hoTen"
@@ -548,7 +633,9 @@ const TaiKhoanManager = (props) => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Email <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Email <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="email"
                     name="email"
@@ -592,10 +679,7 @@ const TaiKhoanManager = (props) => {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Vai trò</Form.Label>
-                  <Form.Select
-                    disabled
-                    value={formData.vaiTro}
-                  >
+                  <Form.Select disabled value={formData.vaiTro}>
                     <option value="ROLE_SV">Sinh viên</option>
                     <option value="ROLE_GV">Giảng viên</option>
                     <option value="ROLE_QL">Quản lý</option>
@@ -612,7 +696,7 @@ const TaiKhoanManager = (props) => {
                       onChange={handleInputChange}
                     >
                       <option value="">-- Chọn khoa --</option>
-                      {khoaList.map(khoa => (
+                      {khoaList.map((khoa) => (
                         <option key={khoa} value={khoa}>
                           {khoa}
                         </option>
@@ -625,17 +709,21 @@ const TaiKhoanManager = (props) => {
                         className="mt-2"
                         name="khoa"
                         placeholder="Nhập tên khoa mới"
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          khoa: e.target.value
-                        })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            khoa: e.target.value,
+                          })
+                        }
                       />
                     )}
                   </Form.Group>
                 )}
                 {formData.vaiTro === "ROLE_SV" && (
                   <Form.Group className="mb-3">
-                    <Form.Label>Lớp học <span className="text-danger">*</span></Form.Label>
+                    <Form.Label>
+                      Lớp học <span className="text-danger">*</span>
+                    </Form.Label>
                     <Form.Select
                       name="maLop"
                       value={formData.maLop}
@@ -643,7 +731,7 @@ const TaiKhoanManager = (props) => {
                       required
                     >
                       <option value="">-- Chọn lớp học --</option>
-                      {lopHocList.map(lop => (
+                      {lopHocList.map((lop) => (
                         <option key={lop.maLop} value={lop.maLop}>
                           {lop.tenLop} ({lop.maLop})
                         </option>
@@ -668,4 +756,4 @@ const TaiKhoanManager = (props) => {
   );
 };
 
-export default TaiKhoanManager; 
+export default TaiKhoanManager;
