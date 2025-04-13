@@ -8,10 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.example.backend.model.YeuCauMuonPhong;
-import com.example.backend.model.YeuCauMuonPhong.TrangThai;
 import com.example.backend.model.NguoiDung;
 import com.example.backend.model.Phong;
+import com.example.backend.model.YeuCauMuonPhong;
+import com.example.backend.model.YeuCauMuonPhong.TrangThai;
 
 @Repository
 public interface YeuCauMuonPhongRepository extends JpaRepository<YeuCauMuonPhong, Integer> {
@@ -83,5 +83,11 @@ public interface YeuCauMuonPhongRepository extends JpaRepository<YeuCauMuonPhong
     	    Date gioBatDau,
     	    Date gioKetThuc
     	);
+
+    // Thêm method mới để lấy dữ liệu thống kê
+    List<YeuCauMuonPhong> findByTrangThaiAndThoiGianMuonBetweenOrderByThoiGianMuon(
+            YeuCauMuonPhong.TrangThai trangThai, 
+            Date tuNgay, 
+            Date denNgay);
 
 }

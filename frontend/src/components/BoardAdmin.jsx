@@ -44,9 +44,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import UserService from "../services/user.service";
+<<<<<<< HEAD
 import { MdPeopleAlt } from "react-icons/md";
 import { BsPersonWorkspace } from "react-icons/bs";
 import { FaCalendarCheck } from "react-icons/fa";
+=======
+import ThongKeTanSuatPhong from './ThongKeTanSuatPhong';
+
+>>>>>>> a845c902786f3f93dd06883e87a4a5598eaeef3f
 const API_URL = "http://localhost:8080/api/quanly";
 
 const BoardAdmin = () => {
@@ -315,6 +320,7 @@ const BoardAdmin = () => {
       >
         <Row>
           <Col md={3} className="mb-4">
+<<<<<<< HEAD
             <Card>
               <Card.Header className="bg-primary text-white">
                 Chức năng quản lý
@@ -350,6 +356,24 @@ const BoardAdmin = () => {
               </ListGroup>
             </Card>
           </Col>
+=======
+          <Card>
+            <Card.Header className="bg-primary text-white">Chức năng quản lý</Card.Header>
+            <ListGroup variant="flush">
+                <ListGroup.Item action eventKey="dashboard">Dashboard</ListGroup.Item>
+                <ListGroup.Item action eventKey="quanlyphong">Quản lý phòng học</ListGroup.Item>
+                <ListGroup.Item action eventKey="quanlygiaovien">Quản lý giảng viên</ListGroup.Item>
+                <ListGroup.Item action eventKey="quanlysinhvien">Quản lý sinh viên</ListGroup.Item>
+                <ListGroup.Item action eventKey="quanlytaikhoan">Quản lý tài khoản</ListGroup.Item>
+                <ListGroup.Item action eventKey="duyetyeucau">Quản lý yêu cầu mượn phòng</ListGroup.Item>
+                <ListGroup.Item action eventKey="lichsumuon">Lịch sử mượn phòng</ListGroup.Item>
+                <ListGroup.Item action eventKey="baocao">Thống kê phản hồi</ListGroup.Item>
+                <ListGroup.Item action eventKey="suco">Quản lý sự cố</ListGroup.Item>
+                <ListGroup.Item action eventKey="thong-ke-tan-suat">Thống kê tần suất mượn phòng</ListGroup.Item>
+            </ListGroup>
+          </Card>
+        </Col>
+>>>>>>> a845c902786f3f93dd06883e87a4a5598eaeef3f
           <Col md={9}>
             <Tab.Content>
               <Tab.Pane eventKey="dashboard">
@@ -1128,6 +1152,9 @@ const BoardAdmin = () => {
               </Tab.Pane>
               <Tab.Pane eventKey="suco">
                 <SuCoManager refreshKey={refreshKey} />
+              </Tab.Pane>
+              <Tab.Pane eventKey="thong-ke-tan-suat">
+                <ThongKeTanSuatPhong />
               </Tab.Pane>
             </Tab.Content>
           </Col>

@@ -3,6 +3,7 @@ package com.example.backend.controllers;
 import com.example.backend.model.NguoiDung;
 import com.example.backend.model.Phong;
 import com.example.backend.model.SinhVien;
+import com.example.backend.model.ThoiKhoaBieu;
 import com.example.backend.model.YeuCauMuonPhong;
 import com.example.backend.model.YeuCauMuonPhong.TrangThai;
 import com.example.backend.payload.request.YeuCauMuonPhongRequest;
@@ -10,6 +11,7 @@ import com.example.backend.payload.response.MessageResponse;
 import com.example.backend.repository.NguoiDungRepository;
 import com.example.backend.repository.PhongRepository;
 import com.example.backend.repository.SinhVienRepository;
+import com.example.backend.repository.ThoiKhoaBieuRepository;
 import com.example.backend.repository.YeuCauMuonPhongRepository;
 import com.example.backend.service.UserDetailsImpl;
 
@@ -46,9 +48,12 @@ public class YeuCauMuonPhongController {
 
     @Autowired
     private NguoiDungRepository nguoiDungRepository;
+    
+    @Autowired
+    private ThoiKhoaBieuRepository thoiKhoaBieuRepository;
 
     @PostMapping("/gui")
-    @PreAuthorize("hasRole('SV')")
+    @PreAuthorize("hasRole('SV') or hasRole('GV')")
     public ResponseEntity<?> guiYeuCauMuonPhong(@RequestBody YeuCauMuonPhongRequest yeuCauRequest) {
         try {
             // Kiểm tra người dùng hiện tại
